@@ -39,10 +39,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!--
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs> -->
+                    </descriptorRefs>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
