@@ -25,13 +25,9 @@
  */
 package es.lcssl.chrono.gui;
 
-import es.lcssl.chrono.chronograph.Chronograph;
-import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeSupport;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -39,48 +35,52 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import javax.swing.JFrame;
 
 import static java.text.MessageFormat.format;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import static es.lcssl.chrono.gui.ChronographModel.LAPSE_PROPERTY;
+import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
+import static es.lcssl.chrono.gui.ChronographModel.TOTAL_PROPERTY;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
-public class JChronograph extends JPanel {
+@SuppressWarnings("serial")
+public class JChronograph 
+        extends JPanel {
 
-    public static final long serialVersionUID = 0;
+    public static final int DEFAULT_INITIAL_DELAY = 3500;
+    public static final int DEFAULT_DELAY         =   47;
 
-    public static final int DEFAULT_INITIAL_DELAY = 3000;
-    public static final int DEFAULT_DELAY = 47;
+    private JLabel           total,
+                             lapse;
+    private JButton          startAndLapse,
+                             stop,
+                             reset;
 
-    private JLabel total, lapse;
-    private JButton startAndLapse, stop, reset;
+    private transient ChronographModel
+                             model;
+    private Timer            timer;
 
-    private ChronographModel model;
-    private Timer timer;
+    private transient ActionListener   
+                             timerListener;
 
-    private ActionListener timerAction;
+    private transient Action startAction,
+                             lapseAction;
 
-    private Action startAction,
-            lapseAction,
-            stopAction,
-            resetAction;
-
-    PropertyChangeSupport propertyChangeSupport
-            = new PropertyChangeSupport(this);
-
+    @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
             LayoutManager layout,
-            boolean isDoubleBuffered) {
+            boolean isDoubleBuffered,
+            String name) {
         super(layout, isDoubleBuffered);
         this.model = model;
         initialize();
     }
 
+    @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
             LayoutManager layout) {
@@ -89,6 +89,7 @@ public class JChronograph extends JPanel {
         initialize();
     }
 
+    @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
             boolean isDoubleBuffered) {
@@ -97,98 +98,99 @@ public class JChronograph extends JPanel {
         initialize();
     }
 
+    @SuppressWarnings("this-escape")
     public JChronograph(ChronographModel model) {
         this.model = model;
         initialize();
     }
 
+    @SuppressWarnings("this-escape")
     public JChronograph() {
+        model = new DefaultChronographModel();
         initialize();
     }
 
     private void initialize() {
-        total = new JLabel("total");
-        lapse = new JLabel("lapse");
-
-        timerAction = (ActionEvent e) -> {
+        JPanel panel = new JPanel();
+        total = new JLabel(format_timestamp(0));
+        panel.add(total);
+        model.addPropertyChangeListener(
+                TOTAL_PROPERTY, evt -> {
+                    total.setText(
+                            format_timestamp(
+                                    (long)evt.getNewValue()));
+                });
+        
+        lapse = new JLabel(format_timestamp(0));
+        model.addPropertyChangeListener(
+                LAPSE_PROPERTY, evt -> {
+                    lapse.setText(
+                            format_timestamp(
+                                    (long)evt.getOldValue()));
+                });
+        panel.add(lapse);
+        
+        timer = new Timer(DEFAULT_DELAY, e -> {
             if (model.isRunning()) // CAN BE SPURIOUS?
-            {
-                update(e.getWhen());
-            }
+                //update(e.getWhen());
             timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
-        };
+        });
+        timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+        timer.setCoalesce(true);
+        timer.addActionListener(timerListener);
 
         startAction = new AbstractAction("Start") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                startAndLapse.setAction(lapseAction);
                 model.start(e.getWhen());
-                timer.setInitialDelay(DEFAULT_DELAY);
-                timer.start();
-                timer.addActionListener(timerAction);
-            }
-        };
-
-        lapseAction = new AbstractAction("Lapse") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!timer.isRunning()
-                        || timer.getInitialDelay() == DEFAULT_INITIAL_DELAY) {
-                    update(e.getWhen());
-                }
-                model.lapse(e.getWhen());
-                timer.restart();
-            }
-        };
-
-        stopAction = new AbstractAction("Stop") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (timer.isRunning()) {
-                    update(e.getWhen());
-                }
-                timer.stop();
-                model.stop(e.getWhen());
-                startAndLapse.setAction(startAction);
-            }
-        };
-
-        resetAction = new AbstractAction("Reset") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                timer.stop();
-                boolean running = model.isRunning();
-                if (running) {
-                    update(e.getWhen());
-                }
-                model.reset(e.getWhen());
-                if (!running) {
-                    update(e.getWhen());
-                } else {
+                if (!timer.isRunning()) {
+                    /* to show immediately */
+                    timer.setInitialDelay(DEFAULT_DELAY);
                     timer.start();
                 }
             }
         };
-
         startAndLapse = new JButton(startAction);
-        stop = new JButton(stopAction);
-        reset = new JButton(resetAction);
-
-        timer = new Timer(DEFAULT_DELAY, timerAction);
-        timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
-        timer.setCoalesce(true);
-        timer.addActionListener(timerAction);
-
-        JPanel panel = new JPanel();
-        panel.add(total);
-        panel.add(lapse);
         panel.add(startAndLapse);
+
+        /* this will be used when changing startAndLapse JButton to this
+         * action. */
+        lapseAction = new AbstractAction("Lapse") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.lapse(e.getWhen());
+                timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+                timer.restart();
+            }
+        };
+        
+        model.addPropertyChangeListener(RUNNING_PROPERTY, evt ->{
+            if (model.isRunning()) {
+                timer.start();
+                startAndLapse.setAction(lapseAction);
+            } else {
+                startAndLapse.setAction(startAction);
+                timer.stop();
+            }
+        });
+
+        stop = new JButton(new AbstractAction("Stop") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timer.stop();
+                model.stop(e.getWhen());
+            }
+        });
         panel.add(stop);
+
+        reset = new JButton(new AbstractAction("Reset") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.reset(e.getWhen());
+            }
+        });
         panel.add(reset);
 
-        long ts = System.currentTimeMillis();
-        model.reset(ts);
-        update(ts);
         this.add(panel);
     }
 
@@ -210,8 +212,9 @@ public class JChronograph extends JPanel {
 
     private void update(long ts) {
         total.setText(format_timestamp(model.getTotalTime(ts)));
-        lapse.setText(format_timestamp(model.getLapTime(ts)));
+        lapse.setText(format_timestamp(model.getLapseTime(ts)));
     }
+    
 
     public JLabel getTotal() {
         return total;
@@ -266,10 +269,9 @@ public class JChronograph extends JPanel {
     }
 
     public void setTimer(Timer timer) {
-        this.timer.removeActionListener(timerAction);
         Timer old = this.timer;
+        old.stop();
         this.timer = timer;
-
-        this.timer.addActionListener(timerAction);
+        this.timer.addActionListener(timerListener);
     }
 }

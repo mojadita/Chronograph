@@ -25,26 +25,39 @@
  */
 package es.lcssl.chrono.gui;
 
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+
 /**
- *
- * @author Luis Colorado <luiscoloradourcola@gmail.com>
+ * This is the ChronographModel interface.
+ * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public interface ChronographModel {
-    
+
+    String
+            RUNNING_PROPERTY = "running",
+            TOTAL_PROPERTY   = "total",
+            LAPSE_PROPERTY   = "lapse",
+            TIMING_PROPERTY  = "timing";
+
     void reset(long ts);
 
     void start(long ts);
 
     void restart(long ts);
-    
+
     void lapse(long ts);
 
     void stop(long ts);
-    
-    boolean isRunning();
 
-    long getLapTime(long ts);
+    boolean isRunning(); /* bound property */
 
-    long getTotalTime(long ts);
+    long getLapseTime(long ts); /* bound property */
+
+    long getTotalTime(long ts); /* bound property */
     
+    void addPropertyChangeListener(
+            String property_name, PropertyChangeListener listener);
+    void removePropertyChangeListener(
+            String property_name, PropertyChangeListener listener);
 }

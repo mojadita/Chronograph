@@ -25,29 +25,39 @@
  */
 package es.lcssl.chrono;
 
+import es.lcssl.chrono.gui.ChronographModel;
+import es.lcssl.chrono.gui.DefaultChronographModel;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
-import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
-import es.lcssl.chrono.chronograph.Chronograph;
 import es.lcssl.chrono.gui.JChronograph;
+import javax.swing.JPanel;
+
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 /**
  *
- * @author Luis Colorado <luiscoloradourcola@gmail.com>
+ * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class Main {
-    
-    public static final void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            JFrame frame = new JFrame("Chronograph V1.0");
-            JChronograph chron = new JChronograph(new Chronograph());
-            frame.add(chron);
-            frame.pack();
-            frame.setVisible(true);
-            frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        });
 
+    public static final void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("Chronograph V1.0");
+                ChronographModel model = new DefaultChronographModel();
+                JChronograph chron1 = new JChronograph(model),
+                        chron2 = new JChronograph(model);
+                JPanel content = new JPanel();
+                frame.setContentPane(content);
+                content.add(chron1);
+                content.add(chron2);
+                frame.pack();
+                frame.setVisible(true);
+                frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            }
+        });
     }
 
 }
