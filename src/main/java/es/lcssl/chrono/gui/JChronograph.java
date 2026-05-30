@@ -37,6 +37,7 @@ import javax.swing.JSeparator;
 import javax.swing.Timer;
 
 import static java.text.MessageFormat.format;
+import static javax.swing.JSeparator.VERTICAL;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RESET_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.START_ACTION;
@@ -45,7 +46,6 @@ import static es.lcssl.chrono.gui.ChronographModel.LAPSE_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
-import static javax.swing.JSeparator.VERTICAL;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -53,8 +53,7 @@ import static javax.swing.JSeparator.VERTICAL;
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 @SuppressWarnings("serial")
-public class JChronograph 
-        extends JPanel {
+public class JChronograph  extends JPanel {
 
     public static final int DEFAULT_INITIAL_DELAY = 3500;
     public static final int DEFAULT_DELAY         =   47;
@@ -123,58 +122,47 @@ public class JChronograph
         total.setText(zero);
         panel.add(total);
         
-        panel.add(new JSeparator(VERTICAL));
-        
         lapse = new JLabel(format_timestamp(0));
         panel.add(lapse);
 
         model.addPropertyChangeListener(RESET_ACTION, evt -> {
-                    long[] new_values = (long[]) evt.getNewValue();
-                    total.setText(format_timestamp(new_values[TOTAL_TIME]));
-                    lapse.setText(format_timestamp(new_values[LAPSE_TIME]));
                     if (model.isRunning()) {
+                        update((long[])evt.getOldValue());
                         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                         timer.restart();
                     } else {
+                        update((long[])evt.getNewValue());
                         timer.setInitialDelay(DEFAULT_DELAY);
                     }
                 });
         model.addPropertyChangeListener(START_ACTION, evt -> {
-                    long[] new_values = (long[]) evt.getNewValue();
-                    total.setText(format_timestamp(new_values[TOTAL_TIME]));
-                    lapse.setText(format_timestamp(new_values[LAPSE_TIME]));
+                    update((long[]) evt.getNewValue());
+                    timer.setInitialDelay(DEFAULT_DELAY);
                     timer.start();
                 });
         model.addPropertyChangeListener(RESTART_ACTION, evt -> {
                     timer.stop();
-                    long[] old_values = (long[]) evt.getOldValue();
-                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
-                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                    update((long[]) evt.getOldValue());
                     timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                     timer.start();
                 });
         model.addPropertyChangeListener(LAPSE_ACTION, evt -> {
                     timer.stop();
-                    long[] old_values = (long[]) evt.getOldValue();
-                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
-                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                    update((long[]) evt.getOldValue());
                     timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                     timer.start();
                 });
         model.addPropertyChangeListener(STOP_ACTION, evt -> {
                     timer.stop();
-                    long[] old_values = (long[]) evt.getOldValue();
-                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
-                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                    update((long[]) evt.getOldValue());
                 });
         
         timer = new Timer(DEFAULT_DELAY, e -> {
             if (!model.isRunning()) return; // CAN BE SPURIOUS?
-            long[] values = model.getIntervals(model.getTimestamp());
-            total.setText(format_timestamp(values[TOTAL_TIME]));
-            lapse.setText(format_timestamp(values[LAPSE_TIME]));
+            update(model.getIntervals(model.getTimestamp()));
             timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         });
+        
         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         timer.setCoalesce(true);
         timer.addActionListener(timerListener);
@@ -183,11 +171,6 @@ public class JChronograph
             @Override
             public void actionPerformed(ActionEvent e) {
                 model.start(e.getWhen());
-                if (!timer.isRunning()) {
-                    /* to show immediately */
-                    timer.setInitialDelay(DEFAULT_DELAY);
-                    timer.start();
-                }
             }
         };
         startAndLapse = new JButton(startAction);
@@ -199,25 +182,20 @@ public class JChronograph
             @Override
             public void actionPerformed(ActionEvent e) {
                 model.lapse(e.getWhen());
-                timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
-                timer.restart();
             }
         };
         
         model.addPropertyChangeListener(RUNNING_PROPERTY, evt ->{
             if (model.isRunning()) {
-                timer.start();
                 startAndLapse.setAction(lapseAction);
             } else {
                 startAndLapse.setAction(startAction);
-                timer.stop();
             }
         });
 
         stop = new JButton(new AbstractAction("Stop") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                timer.stop();
                 model.stop(e.getWhen());
             }
         });
@@ -242,13 +220,18 @@ public class JChronograph
             mods[i] = (int) (ts % dividers[i]);
             ts /= dividers[i];
         }
-        String s1 = ts > 0 ? format("{0,number,##000d}d ", ts) : "",
+        String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
                 s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
                         mods[3], mods[2], mods[1]),
                 s3 = format("{0,number,000}",
                         mods[0]);
         return format("<html><font size=+1>{0}{1}</font>.{2}</html>",
                 s1, s2, s3);
+    }
+
+    private void update(long[] values) {
+        total.setText(format_timestamp(values[TOTAL_TIME]));
+        lapse.setText(format_timestamp(values[LAPSE_TIME]));
     }
 
     public JLabel getTotal() {
