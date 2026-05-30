@@ -33,12 +33,17 @@ import java.beans.PropertyChangeListener;
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public interface ChronographModel {
+    
+    int TOTAL_TIME = 0,
+        LAPSE_TIME = 1;
 
     String
             RUNNING_PROPERTY = "running",
-            TOTAL_PROPERTY   = "total",
-            LAPSE_PROPERTY   = "lapse",
-            TIMING_PROPERTY  = "timing";
+            RESET_ACTION     = "reset",
+            START_ACTION     = "timing",
+            RESTART_ACTION   = "restart",
+            LAPSE_ACTION     = "lapse",
+            STOP_ACTION      = "stop";
 
     void reset(long ts);
 
@@ -52,9 +57,9 @@ public interface ChronographModel {
 
     boolean isRunning(); /* bound property */
 
-    long getLapseTime(long ts); /* bound property */
-
-    long getTotalTime(long ts); /* bound property */
+    long[] getIntervals(long ts); /* bound property */
+    
+    long getTimestamp();
     
     void addPropertyChangeListener(
             String property_name, PropertyChangeListener listener);

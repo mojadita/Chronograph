@@ -40,7 +40,6 @@ import static java.text.MessageFormat.format;
  */
 public class DefaultChronographModel implements ChronographModel {
 
-    public static final long serialVersionUID = 0;
 
     private long                  startTime,
                                   lapseTime,
@@ -64,121 +63,64 @@ public class DefaultChronographModel implements ChronographModel {
     
     @Override
     public void reset(long ts) {
-        long old_totalTime = getTotalTime(ts);
-        long old_lapseTime = getLapseTime(ts);
+        long[]  old_values   = getIntervals(ts);
         startTime = lapseTime = stopTime = ts;
-        // notify all listeners.
-        System.out.println(format(
-                "{0}.reset({1,number,0}), total={2,number,0}, old_lapse= {3,number,0}, lapse={3,number,0}",
-                getClass().getSimpleName(),
-                ts,
-                getTotalTime(ts),
-                old_lapseTime,
-                getLapseTime(ts)));
-        pcs.firePropertyChange(TOTAL_PROPERTY,
-                old_totalTime, getTotalTime(ts));
-        /* this binds TOTAL_PROPERTY */
-        pcs.firePropertyChange(LAPSE_PROPERTY,
-                0, 0); /* this binds LAPSE_PROPERTY */
+        pcs.firePropertyChange(RESET_ACTION,
+                old_values, getIntervals(ts));
     }
 
     @Override
     public void start(long ts) { /* this binds TOTAL_PROPERTY */
-        boolean old_running   = running;
-        long    old_totalTime = getTotalTime(ts),
-                old_lapseTime = getLapseTime(ts),
-                stopped       = ts - stopTime;
-        startTime += stopped;
-        lapseTime += stopped;
+        if (running) return;
+        
+        long[] old_values = getIntervals(ts);
+        long time_stopped = ts - stopTime;
+        startTime += time_stopped;
+        lapseTime += time_stopped;
         running    = true;
-        /* this binds RUNNING_PROPERTY */
-        if (!old_running) {
-            System.out.println(format(
-                "{0}.start({1,number,0}), total={2,number,0}, old_lapse= {3,number,0}, lapse={3,number,0}",
-                    getClass().getSimpleName(),
-                    ts,
-                    getTotalTime(ts),
-                    old_lapseTime,
-                    getLapseTime(ts)));
-            pcs.firePropertyChange(RUNNING_PROPERTY,
-                    old_running, running);
-            /* this binds TOTAL_PROPERTY */
-            pcs.firePropertyChange(TOTAL_PROPERTY,
-                    old_totalTime, getTotalTime(ts));
-            /* this binds TOTAL_PROPERTY */
-            pcs.firePropertyChange(LAPSE_PROPERTY,
-                    old_lapseTime, getLapseTime(ts));
-        }
+        pcs.firePropertyChange(RUNNING_PROPERTY,
+                false, running);
+        pcs.firePropertyChange(START_ACTION,
+                old_values, getIntervals(ts));
     }
 
     @Override
     public void stop(long ts) {
-        boolean old_running   = running;
-        long    old_totalTime = getTotalTime(ts),
-                old_lapseTime = getLapseTime(ts);
+        if (!running) return;
         
-        running     = false;
-        lapseTime   = ts;
-        stopTime    = ts;
+        long[] old_values = getIntervals(ts);
         
-        if (old_running) {
-            /* binds RUNNING_PROPERTY */
-            System.out.println(format(
-                "{0}.stop({1,number,0}), total={2,number,0}, old_lapse= {3,number,0}, lapse={3,number,0}",
-                    getClass().getSimpleName(),
-                    ts,
-                    getTotalTime(ts),
-                    old_lapseTime,
-                    getLapseTime(ts)));
-            pcs.firePropertyChange(RUNNING_PROPERTY,
-                    old_running, running);
-            pcs.firePropertyChange(TOTAL_PROPERTY,
-                    old_totalTime, getTotalTime(ts));
-            pcs.firePropertyChange(LAPSE_PROPERTY,
-                    old_lapseTime, getLapseTime(ts));
-        }
+        running  = false;
+        stopTime = ts;
+        
+        pcs.firePropertyChange(RUNNING_PROPERTY,
+                true, false);
+        pcs.firePropertyChange(STOP_ACTION,
+                old_values, getIntervals(ts));
     }
 
     @Override
     public void restart(long ts) {
-        long old_lapseTime = getLapseTime(ts);
-        stop(ts);
-        start(ts);
-        System.out.println(format(
-                "{0}.restart({1,number,0}), total={2,number,0}, old_lapse= {3,number,0}, lapse={3,number,0}",
-                getClass().getSimpleName(),
-                ts,
-                getTotalTime(ts),
-                old_lapseTime,
-                getLapseTime(ts)));
+        if (!running) return;
+        long[] old_values = getIntervals(ts);
+        
+        startTime = lapseTime = ts;
+        
+        pcs.firePropertyChange(RESTART_ACTION,
+                old_values, getIntervals(ts));
     }
 
     @Override
     public void lapse(long ts) {
-        long old_totalTime = getTotalTime(ts),
-             old_lapseTime = DefaultChronographModel.this.getLapseTime(ts);
+        long[] old_intervals = getIntervals(ts);
         lapseTime = ts;
-        System.out.println(format(
-                "{0}.lapse({1,number,0}), total={2,number,0}, old_lapse= {3,number,0}, lapse={3,number,0}",
-                getClass().getSimpleName(),
-                ts,
-                getTotalTime(ts),
-                old_lapseTime,
-                getLapseTime(ts)));
-        pcs.firePropertyChange(TOTAL_PROPERTY,
-                old_totalTime, getTotalTime(ts));
-        pcs.firePropertyChange(LAPSE_PROPERTY,
-                old_lapseTime, DefaultChronographModel.this.getLapseTime(ts));
+        pcs.firePropertyChange(LAPSE_ACTION,
+                old_intervals, getIntervals(ts));
     }
 
     @Override
-    public long getLapseTime(long ts) {
-        return ts - lapseTime;
-    }
-
-    @Override
-    public long getTotalTime(long ts) {
-        return ts - startTime;
+    public long[] getIntervals(long ts) {
+        return new long[] { ts - startTime, ts - lapseTime };
     }
 
     public void reset() {
@@ -205,13 +147,10 @@ public class DefaultChronographModel implements ChronographModel {
     public boolean isRunning() {
         return running;
     }
-
-    public long getTotalTime() {
-        return getTotalTime(timestamper.get());
-    }
-
-    public long getLapseTime() {
-        return getLapseTime(timestamper.get());
+    
+    @Override
+    public long getTimestamp() {
+        return timestamper.get();
     }
 
     public long getStartTime() {

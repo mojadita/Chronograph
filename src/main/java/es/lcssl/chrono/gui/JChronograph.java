@@ -33,13 +33,19 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.Timer;
 
-
 import static java.text.MessageFormat.format;
-import static es.lcssl.chrono.gui.ChronographModel.LAPSE_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
-import static es.lcssl.chrono.gui.ChronographModel.TOTAL_PROPERTY;
+import static es.lcssl.chrono.gui.ChronographModel.RESET_ACTION;
+import static es.lcssl.chrono.gui.ChronographModel.START_ACTION;
+import static es.lcssl.chrono.gui.ChronographModel.RESTART_ACTION;
+import static es.lcssl.chrono.gui.ChronographModel.LAPSE_ACTION;
+import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
+import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
+import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
+import static javax.swing.JSeparator.VERTICAL;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -111,28 +117,62 @@ public class JChronograph
     }
 
     private void initialize() {
+        String zero = format_timestamp(0);
         JPanel panel = new JPanel();
-        total = new JLabel(format_timestamp(0));
+        total = new JLabel("total");
+        total.setText(zero);
         panel.add(total);
-        model.addPropertyChangeListener(
-                TOTAL_PROPERTY, evt -> {
-                    total.setText(
-                            format_timestamp(
-                                    (long)evt.getNewValue()));
-                });
+        
+        panel.add(new JSeparator(VERTICAL));
         
         lapse = new JLabel(format_timestamp(0));
-        model.addPropertyChangeListener(
-                LAPSE_PROPERTY, evt -> {
-                    lapse.setText(
-                            format_timestamp(
-                                    (long)evt.getOldValue()));
-                });
         panel.add(lapse);
+
+        model.addPropertyChangeListener(RESET_ACTION, evt -> {
+                    long[] new_values = (long[]) evt.getNewValue();
+                    total.setText(format_timestamp(new_values[TOTAL_TIME]));
+                    lapse.setText(format_timestamp(new_values[LAPSE_TIME]));
+                    if (model.isRunning()) {
+                        timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+                        timer.restart();
+                    } else {
+                        timer.setInitialDelay(DEFAULT_DELAY);
+                    }
+                });
+        model.addPropertyChangeListener(START_ACTION, evt -> {
+                    long[] new_values = (long[]) evt.getNewValue();
+                    total.setText(format_timestamp(new_values[TOTAL_TIME]));
+                    lapse.setText(format_timestamp(new_values[LAPSE_TIME]));
+                    timer.start();
+                });
+        model.addPropertyChangeListener(RESTART_ACTION, evt -> {
+                    timer.stop();
+                    long[] old_values = (long[]) evt.getOldValue();
+                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
+                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                    timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+                    timer.start();
+                });
+        model.addPropertyChangeListener(LAPSE_ACTION, evt -> {
+                    timer.stop();
+                    long[] old_values = (long[]) evt.getOldValue();
+                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
+                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                    timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+                    timer.start();
+                });
+        model.addPropertyChangeListener(STOP_ACTION, evt -> {
+                    timer.stop();
+                    long[] old_values = (long[]) evt.getOldValue();
+                    total.setText(format_timestamp(old_values[TOTAL_TIME]));
+                    lapse.setText(format_timestamp(old_values[LAPSE_TIME]));
+                });
         
         timer = new Timer(DEFAULT_DELAY, e -> {
-            if (model.isRunning()) // CAN BE SPURIOUS?
-                //update(e.getWhen());
+            if (!model.isRunning()) return; // CAN BE SPURIOUS?
+            long[] values = model.getIntervals(model.getTimestamp());
+            total.setText(format_timestamp(values[TOTAL_TIME]));
+            lapse.setText(format_timestamp(values[LAPSE_TIME]));
             timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         });
         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
@@ -191,7 +231,8 @@ public class JChronograph
         });
         panel.add(reset);
 
-        this.add(panel);
+        add(panel);
+        model.reset(System.currentTimeMillis());
     }
 
     private String format_timestamp(long ts) {
@@ -209,12 +250,6 @@ public class JChronograph
         return format("<html><font size=+1>{0}{1}</font>.{2}</html>",
                 s1, s2, s3);
     }
-
-    private void update(long ts) {
-        total.setText(format_timestamp(model.getTotalTime(ts)));
-        lapse.setText(format_timestamp(model.getLapseTime(ts)));
-    }
-    
 
     public JLabel getTotal() {
         return total;
