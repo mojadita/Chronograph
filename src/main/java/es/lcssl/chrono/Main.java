@@ -47,8 +47,8 @@ public class Main {
             public void run() {
                 JFrame frame = new JFrame("Chronograph V1.0");
                 ChronographModel model = new DefaultChronographModel();
-                JChronograph chron1 = new JChronograph(model),
-                        chron2 = new JChronograph(model);
+                JChronograph chron1 = new JChronograph(model, "Original"),
+                        chron2 = new JChronograph(model, "Copia");
                 JPanel content = new JPanel();
                 frame.setContentPane(content);
                 content.add(chron1);

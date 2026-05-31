@@ -46,6 +46,13 @@ import static es.lcssl.chrono.gui.ChronographModel.LAPSE_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -57,6 +64,8 @@ public class JChronograph  extends JPanel {
 
     public static final int DEFAULT_INITIAL_DELAY = 5000;
     public static final int DEFAULT_DELAY         =   47;
+
+    String                   name;
 
     private JLabel           total,
                              lapse;
@@ -84,6 +93,7 @@ public class JChronograph  extends JPanel {
         super(layout, isDoubleBuffered);
 		this.name  = name;
         this.model = model;
+        this.name  = name;
         initialize();
 		/* don't put anything after initialize() */
     }
@@ -91,46 +101,63 @@ public class JChronograph  extends JPanel {
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            LayoutManager layout) {
+            LayoutManager layout,
+            String name) {
         super(layout);
 		this.name  = name;
         this.model = model;
+        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            boolean isDoubleBuffered) {
+            boolean isDoubleBuffered,
+            String name) {
         super(isDoubleBuffered);
 		this.name  = name;
         this.model = model;
+        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
-    public JChronograph(ChronographModel model) {
-		this.name  = name;
+    public JChronograph(ChronographModel model, String name) {
         this.model = model;
+        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
-    public JChronograph() {
-        model = new DefaultChronographModel();
+    public JChronograph(String name) {
+        this.model = new DefaultChronographModel();
+        this.name = name;
         initialize();
     }
 
     private void initialize() {
         String zero  = format_timestamp(0);
         JPanel panel = new JPanel();
-
+        ((FlowLayout) panel.getLayout()).setAlignOnBaseline(true);
+        panel.setBorder(
+                new TitledBorder(
+                        new EtchedBorder(EtchedBorder.LOWERED),
+                        name));
         total = new JLabel("total");
+        total.setBorder(
+                new TitledBorder(
+                        new EtchedBorder(EtchedBorder.LOWERED),
+                        "Total"));
         total.setText(zero);
         panel.add(total);
         
-        lapse = new JLabel("lapse");
-		lapse.setText(zero);
+        lapse = new JLabel(format_timestamp(0));
+        lapse.setBorder(
+                new TitledBorder(
+                        new EtchedBorder(EtchedBorder.LOWERED),
+                        "Lapse"));
+        lapse.setText(zero);
         panel.add(lapse);
 
         model.addPropertyChangeListener(RESET_ACTION, evt -> {
