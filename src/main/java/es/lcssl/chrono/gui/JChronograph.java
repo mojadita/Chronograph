@@ -55,7 +55,7 @@ import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
 @SuppressWarnings("serial")
 public class JChronograph  extends JPanel {
 
-    public static final int DEFAULT_INITIAL_DELAY = 3500;
+    public static final int DEFAULT_INITIAL_DELAY = 5000;
     public static final int DEFAULT_DELAY         =   47;
 
     private JLabel           total,
@@ -64,8 +64,7 @@ public class JChronograph  extends JPanel {
                              stop,
                              reset;
 
-    private transient ChronographModel
-                             model;
+    private ChronographModel model;
     private Timer            timer;
 
     private transient ActionListener   
@@ -74,6 +73,8 @@ public class JChronograph  extends JPanel {
     private transient Action startAction,
                              lapseAction;
 
+	private String           name;
+
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
@@ -81,8 +82,10 @@ public class JChronograph  extends JPanel {
             boolean isDoubleBuffered,
             String name) {
         super(layout, isDoubleBuffered);
+		this.name  = name;
         this.model = model;
         initialize();
+		/* don't put anything after initialize() */
     }
 
     @SuppressWarnings("this-escape")
@@ -90,6 +93,7 @@ public class JChronograph  extends JPanel {
             ChronographModel model,
             LayoutManager layout) {
         super(layout);
+		this.name  = name;
         this.model = model;
         initialize();
     }
@@ -99,12 +103,14 @@ public class JChronograph  extends JPanel {
             ChronographModel model,
             boolean isDoubleBuffered) {
         super(isDoubleBuffered);
+		this.name  = name;
         this.model = model;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
     public JChronograph(ChronographModel model) {
+		this.name  = name;
         this.model = model;
         initialize();
     }
@@ -116,13 +122,15 @@ public class JChronograph  extends JPanel {
     }
 
     private void initialize() {
-        String zero = format_timestamp(0);
+        String zero  = format_timestamp(0);
         JPanel panel = new JPanel();
+
         total = new JLabel("total");
         total.setText(zero);
         panel.add(total);
         
-        lapse = new JLabel(format_timestamp(0));
+        lapse = new JLabel("lapse");
+		lapse.setText(zero);
         panel.add(lapse);
 
         model.addPropertyChangeListener(RESET_ACTION, evt -> {
@@ -158,7 +166,7 @@ public class JChronograph  extends JPanel {
                 });
         
         timer = new Timer(DEFAULT_DELAY, e -> {
-            if (!model.isRunning()) return; // CAN BE SPURIOUS?
+            // if (!model.isRunning()) return; // CAN BE SPURIOUS?
             update(model.getIntervals(model.getTimestamp()));
             timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         });
@@ -220,10 +228,11 @@ public class JChronograph  extends JPanel {
             mods[i] = (int) (ts % dividers[i]);
             ts /= dividers[i];
         }
+		/* ts holds finally the number of days of the time */
         String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
-                s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
+               s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
                         mods[3], mods[2], mods[1]),
-                s3 = format("{0,number,000}",
+               s3 = format("{0,number,000}",
                         mods[0]);
         return format("<html><font size=+1>{0}{1}</font>.{2}</html>",
                 s1, s2, s3);
@@ -234,62 +243,11 @@ public class JChronograph  extends JPanel {
         lapse.setText(format_timestamp(values[LAPSE_TIME]));
     }
 
-    public JLabel getTotal() {
-        return total;
-    }
-
-    public void setTotal(JLabel total) {
-        this.total = total;
-    }
-
-    public JLabel getLapse() {
-        return lapse;
-    }
-
-    public void setLapse(JLabel lapse) {
-        this.lapse = lapse;
-    }
-
-    public JButton getStartAndLapse() {
-        return startAndLapse;
-    }
-
-    public void setStartAndLapse(JButton startAndLapse) {
-        this.startAndLapse = startAndLapse;
-    }
-
-    public JButton getStop() {
-        return stop;
-    }
-
-    public void setStop(JButton stop) {
-        this.stop = stop;
-    }
-
-    public JButton getReset() {
-        return reset;
-    }
-
-    public void setReset(JButton reset) {
-
-    }
-
     public ChronographModel getModel() {
         return model;
     }
 
-    public void setModel(ChronographModel model) {
-        this.model = model;
-    }
-
     public Timer getTimer() {
         return timer;
-    }
-
-    public void setTimer(Timer timer) {
-        Timer old = this.timer;
-        old.stop();
-        this.timer = timer;
-        this.timer.addActionListener(timerListener);
     }
 }

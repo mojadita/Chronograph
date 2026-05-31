@@ -52,8 +52,8 @@ public class DefaultChronographModel implements ChronographModel {
     private PropertyChangeSupport pcs;
 
     @SuppressWarnings("this-escape")
-    public DefaultChronographModel(Supplier<Long> ts) {
-        timestamper = ts;
+    public DefaultChronographModel(Supplier<Long> ts_provider) {
+        timestamper = ts_provider;
         pcs         = new PropertyChangeSupport(this);
     }
 
@@ -63,7 +63,7 @@ public class DefaultChronographModel implements ChronographModel {
     
     @Override
     public void reset(long ts) {
-        long[]  old_values   = getIntervals(ts);
+        long[]  old_values    = getIntervals(ts);
         startTime = lapseTime = stopTime = ts;
         pcs.firePropertyChange(RESET_ACTION,
                 old_values, getIntervals(ts));
@@ -102,6 +102,7 @@ public class DefaultChronographModel implements ChronographModel {
     @Override
     public void restart(long ts) {
         if (!running) return;
+
         long[] old_values = getIntervals(ts);
         
         startTime = lapseTime = ts;

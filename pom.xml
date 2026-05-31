@@ -13,6 +13,15 @@
         <maven.compiler.release>11</maven.compiler.release>
         <exec.mainClass>es.lcssl.chrono.Main</exec.mainClass>
     </properties>    
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+			<!-- <scope>test</scope> -->
+        </dependency>
+    </dependencies>
     
     <build>
         <plugins>
@@ -52,11 +61,4 @@
             </plugin>
 		</plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-        </dependency>
-    </dependencies>
 </project>

@@ -34,13 +34,13 @@ import java.beans.PropertyChangeListener;
  */
 public interface ChronographModel {
     
-    int TOTAL_TIME = 0,
-        LAPSE_TIME = 1;
+    public static final int TOTAL_TIME = 0,
+                            LAPSE_TIME = 1;
 
     String
             RUNNING_PROPERTY = "running",
             RESET_ACTION     = "reset",
-            START_ACTION     = "timing",
+            START_ACTION     = "start",
             RESTART_ACTION   = "restart",
             LAPSE_ACTION     = "lapse",
             STOP_ACTION      = "stop";
