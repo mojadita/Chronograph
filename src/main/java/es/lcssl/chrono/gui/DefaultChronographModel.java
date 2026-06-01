@@ -27,9 +27,9 @@ package es.lcssl.chrono.gui;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-import static java.text.MessageFormat.format;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +42,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class DefaultChronographModel implements ChronographModel {
 
-    private static final Logger   log = LogManager.getLogger();
+    private static final Logger   log =
+            LogManager.getLogger(DefaultChronographModel.class);
 
     private long                  startTime,
                                   lapseTime,
@@ -54,6 +55,8 @@ public class DefaultChronographModel implements ChronographModel {
 
     private PropertyChangeSupport pcs;
 
+    private String name;
+
     @SuppressWarnings("this-escape")
     public DefaultChronographModel(Supplier<Long> ts_provider) {
         timestamper = ts_provider;
@@ -62,6 +65,21 @@ public class DefaultChronographModel implements ChronographModel {
 
     public DefaultChronographModel() {
         this(System::currentTimeMillis);
+        name        = null;
+    }
+
+    @SuppressWarnings("this-escape")
+    public DefaultChronographModel(
+            Supplier<Long> ts_provider,
+            String name) {
+        timestamper = ts_provider;
+        pcs         = new PropertyChangeSupport(this);
+        this.name   = name;
+    }
+
+    public DefaultChronographModel(String name) {
+        this(System::currentTimeMillis);
+        this.name   = name;
     }
 
     @Override
@@ -71,9 +89,9 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESET_ACTION,
                 old_values, new_values);
-        log.info("{}: ts={}, OLD: Total={},"
+        log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
-                RESET_ACTION, ts,
+                name, RESET_ACTION, ts,
                 old_values[TOTAL_TIME], old_values[LAPSE_TIME],
                 new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
@@ -92,9 +110,9 @@ public class DefaultChronographModel implements ChronographModel {
                 false, running);
         pcs.firePropertyChange(START_ACTION,
                 old_values, getIntervals(ts));
-        log.info("{}: ts={}, OLD: Total={},"
+        log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
-                START_ACTION, ts,
+                name, START_ACTION, ts,
                 old_values[TOTAL_TIME], old_values[LAPSE_TIME],
                 new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
@@ -112,9 +130,9 @@ public class DefaultChronographModel implements ChronographModel {
                 true, false);
         pcs.firePropertyChange(STOP_ACTION,
                 old_values, getIntervals(ts));
-        log.info("{}: ts={}, OLD: Total={},"
+        log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
-                STOP_ACTION, ts,
+                name, STOP_ACTION, ts,
                 old_values[TOTAL_TIME], old_values[LAPSE_TIME],
                 new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
@@ -128,10 +146,9 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESTART_ACTION,
                 old_values, new_values);
-        log.info("{}: ts={}, OLD: Total={},"
+        log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
-                RESTART_ACTION,
-                ts,
+                name, RESTART_ACTION, ts,
                 old_values[TOTAL_TIME], old_values[LAPSE_TIME],
                 new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
@@ -143,9 +160,9 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(LAPSE_ACTION,
                 old_values, new_values);
-        log.info("{}: ts={}, OLD: Total={},"
+        log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
-                LAPSE_ACTION, ts,
+                name, LAPSE_ACTION, ts,
                 old_values[TOTAL_TIME], old_values[LAPSE_TIME],
                 new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
@@ -153,6 +170,21 @@ public class DefaultChronographModel implements ChronographModel {
     @Override
     public long[] getIntervals(long ts) {
         return new long[] { ts - startTime, ts - lapseTime };
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        String old_name = name;
+        this.name = name;
+        String new_name = name;
+        if (!Objects.equals(old_name, new_name))
+            pcs.firePropertyChange(NAME_PROPERTY,
+                    old_name, new_name);
     }
 
     public void reset() {

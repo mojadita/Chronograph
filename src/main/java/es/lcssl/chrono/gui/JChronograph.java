@@ -39,6 +39,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import static java.text.MessageFormat.format;
+import static es.lcssl.chrono.gui.ChronographModel.NAME_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RESET_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.START_ACTION;
@@ -47,6 +48,7 @@ import static es.lcssl.chrono.gui.ChronographModel.LAPSE_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
+import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -67,6 +69,7 @@ public class JChronograph  extends JPanel {
 
     private ChronographModel model;
     private Timer            timer;
+    private TitledBorder     title;
 
     private transient ActionListener
                              timerListener;
@@ -74,17 +77,16 @@ public class JChronograph  extends JPanel {
     private transient Action startAction,
                              lapseAction;
 
-    private String           name;
+    private String           format =
+            "<html><font size=+1>{0}{1}</font>.{2}";
 
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
             LayoutManager layout,
-            boolean isDoubleBuffered,
-            String name) {
+            boolean isDoubleBuffered) {
         super(layout, isDoubleBuffered);
         this.model = model;
-        this.name  = name;
         initialize();
         /* don't put anything after initialize() */
     }
@@ -92,47 +94,44 @@ public class JChronograph  extends JPanel {
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            LayoutManager layout,
-            String name) {
+            LayoutManager layout) {
         super(layout);
         this.model = model;
-        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            boolean isDoubleBuffered,
-            String name) {
+            boolean isDoubleBuffered) {
         super(isDoubleBuffered);
         this.model = model;
-        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
-    public JChronograph(ChronographModel model, String name) {
+    public JChronograph(ChronographModel model) {
         this.model = model;
-        this.name  = name;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
     public JChronograph(String name) {
         this.model = new DefaultChronographModel();
-        this.name = name;
         initialize();
     }
 
     private void initialize() {
-        String zero  = format_timestamp(0);
+        String zero  = format_timestamp(0, format);
         JPanel panel = new JPanel();
         ((FlowLayout) panel.getLayout()).setAlignOnBaseline(true);
         panel.setBorder(
-                new TitledBorder(
+                title = new TitledBorder(
                         new EtchedBorder(EtchedBorder.LOWERED),
-                        name));
+                        model.getName()));
+        model.addPropertyChangeListener(NAME_PROPERTY, e -> {
+            title.setTitle((String) e.getNewValue());
+        });
         total = new JLabel("total");
         total.setBorder(
                 new TitledBorder(
@@ -141,7 +140,7 @@ public class JChronograph  extends JPanel {
         total.setText(zero);
         panel.add(total);
 
-        lapse = new JLabel(format_timestamp(0));
+        lapse = new JLabel(format_timestamp(0, format));
         lapse.setBorder(
                 new TitledBorder(
                         new EtchedBorder(EtchedBorder.LOWERED),
@@ -237,30 +236,21 @@ public class JChronograph  extends JPanel {
         model.reset(System.currentTimeMillis());
     }
 
-    private String format_timestamp(long ts) {
-        int[] dividers = {1000, 60, 60, 24};
-        int[] mods = new int[dividers.length];
-        for (int i = 0; i < dividers.length; ++i) {
-            mods[i] = (int) (ts % dividers[i]);
-            ts /= dividers[i];
-        }
-        /* ts holds finally the number of days of the time */
-        String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
-               s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
-                        mods[3], mods[2], mods[1]),
-               s3 = format("{0,number,000}",
-                        mods[0]);
-        return format("<html><font size=+1>{0}{1}</font>.{2}</html>",
-                s1, s2, s3);
-    }
-
     private void update(long[] values) {
-        total.setText(format_timestamp(values[TOTAL_TIME]));
-        lapse.setText(format_timestamp(values[LAPSE_TIME]));
+        total.setText(format_timestamp(values[TOTAL_TIME], format));
+        lapse.setText(format_timestamp(values[LAPSE_TIME], format));
     }
 
     public ChronographModel getModel() {
         return model;
+    }
+
+    public String getName() {
+        return model.getName();
+    }
+
+    public void setName(String new_name) {
+        model.setName(new_name);
     }
 
     public Timer getTimer() {

@@ -26,6 +26,7 @@
 package es.lcssl.chrono.gui;
 
 import java.beans.PropertyChangeListener;
+import static java.text.MessageFormat.format;
 
 /**
  * This is the ChronographModel interface.
@@ -37,6 +38,7 @@ public interface ChronographModel {
                             LAPSE_TIME = 1;
 
     String
+            NAME_PROPERTY    = "name",
             RUNNING_PROPERTY = "running",
             RESET_ACTION     = "reset",
             START_ACTION     = "start",
@@ -60,8 +62,29 @@ public interface ChronographModel {
 
     long getTimestamp();
 
+    String getName();
+
+    void setName(String new_name);
+
     void addPropertyChangeListener(
             String property_name, PropertyChangeListener listener);
     void removePropertyChangeListener(
             String property_name, PropertyChangeListener listener);
+
+    public static String format_timestamp(long ts, String format) {
+        int[] dividers = {1000, 60, 60, 24};
+        int[] mods = new int[dividers.length];
+        for (int i = 0; i < dividers.length; ++i) {
+            mods[i] = (int) (ts % dividers[i]);
+            ts /= dividers[i];
+        }
+        /* ts holds finally the number of days of the time */
+        String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
+               s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
+                        mods[3], mods[2], mods[1]),
+               s3 = format("{0,number,000}",
+                        mods[0]);
+        return format(format,
+                s1, s2, s3);
+    }
 }

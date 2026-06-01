@@ -9,7 +9,7 @@
       <PatternLayout pattern="%p - %m%n"/>
     </Console>
     <File name="MAIN" fileName="logs/main.log">
-      <JsonTemplateLayout/>
+      <PatternLayout pattern="%d %p %c - %m%n"/>
     </File>
     <File name="DEBUG_LOG" fileName="logs/debug.log">
       <PatternLayout pattern="%d [%t] %p %c - %m%n"/>
