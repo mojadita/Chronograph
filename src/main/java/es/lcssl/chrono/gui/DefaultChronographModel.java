@@ -33,6 +33,8 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
+
 /**
  * Class to manage a chronograph. The time is based on a {@code long}
  * milliseconds based method call.  It implements the {@link ChronographModel}
@@ -44,6 +46,8 @@ public class DefaultChronographModel implements ChronographModel {
 
     private static final Logger   log =
             LogManager.getLogger(DefaultChronographModel.class);
+
+    private static final String FORMAT = "{0}{1}.{2}";
 
     private long                  startTime,
                                   lapseTime,
@@ -92,8 +96,10 @@ public class DefaultChronographModel implements ChronographModel {
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, RESET_ACTION, ts,
-                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
-                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
+                format_timestamp(old_values[TOTAL_TIME], FORMAT),
+                format_timestamp(old_values[LAPSE_TIME], FORMAT),
+                format_timestamp(new_values[TOTAL_TIME], FORMAT),
+                format_timestamp(new_values[LAPSE_TIME], FORMAT));
     }
 
     @Override
@@ -113,8 +119,10 @@ public class DefaultChronographModel implements ChronographModel {
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, START_ACTION, ts,
-                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
-                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
+                format_timestamp(old_values[TOTAL_TIME], FORMAT),
+                format_timestamp(old_values[LAPSE_TIME], FORMAT),
+                format_timestamp(new_values[TOTAL_TIME], FORMAT),
+                format_timestamp(new_values[LAPSE_TIME], FORMAT));
     }
 
     @Override
@@ -133,8 +141,10 @@ public class DefaultChronographModel implements ChronographModel {
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, STOP_ACTION, ts,
-                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
-                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
+                format_timestamp(old_values[TOTAL_TIME], FORMAT),
+                format_timestamp(old_values[LAPSE_TIME], FORMAT),
+                format_timestamp(new_values[TOTAL_TIME], FORMAT),
+                format_timestamp(new_values[LAPSE_TIME], FORMAT));
     }
 
     @Override
@@ -149,8 +159,10 @@ public class DefaultChronographModel implements ChronographModel {
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, RESTART_ACTION, ts,
-                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
-                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
+                format_timestamp(old_values[TOTAL_TIME], FORMAT),
+                format_timestamp(old_values[LAPSE_TIME], FORMAT),
+                format_timestamp(new_values[TOTAL_TIME], FORMAT),
+                format_timestamp(new_values[LAPSE_TIME], FORMAT));
     }
 
     @Override
@@ -163,8 +175,10 @@ public class DefaultChronographModel implements ChronographModel {
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, LAPSE_ACTION, ts,
-                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
-                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
+                format_timestamp(old_values[TOTAL_TIME], FORMAT),
+                format_timestamp(old_values[LAPSE_TIME], FORMAT),
+                format_timestamp(new_values[TOTAL_TIME], FORMAT),
+                format_timestamp(new_values[LAPSE_TIME], FORMAT));
     }
 
     @Override
@@ -179,9 +193,9 @@ public class DefaultChronographModel implements ChronographModel {
 
     @Override
     public void setName(String name) {
-        String old_name = name;
+        String old_name = getName();
         this.name = name;
-        String new_name = name;
+        String new_name = getName();
         if (!Objects.equals(old_name, new_name))
             pcs.firePropertyChange(NAME_PROPERTY,
                     old_name, new_name);

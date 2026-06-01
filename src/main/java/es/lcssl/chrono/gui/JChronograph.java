@@ -38,7 +38,6 @@ import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import static java.text.MessageFormat.format;
 import static es.lcssl.chrono.gui.ChronographModel.NAME_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RESET_ACTION;
@@ -58,8 +57,8 @@ import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
 @SuppressWarnings("serial")
 public class JChronograph  extends JPanel {
 
-    public static final int DEFAULT_INITIAL_DELAY = 5000;
-    public static final int DEFAULT_DELAY         =   47;
+    public static final int  DEFAULT_INITIAL_DELAY = 5000;
+    public static final int  DEFAULT_DELAY         =   47;
 
     private JLabel           total,
                              lapse;
@@ -67,7 +66,8 @@ public class JChronograph  extends JPanel {
                              stop,
                              reset;
 
-    private ChronographModel model;
+    private final ChronographModel
+                             model;
     private Timer            timer;
     private TitledBorder     title;
 
@@ -83,8 +83,9 @@ public class JChronograph  extends JPanel {
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            LayoutManager layout,
-            boolean isDoubleBuffered) {
+            LayoutManager    layout,
+            boolean          isDoubleBuffered)
+    {
         super(layout, isDoubleBuffered);
         this.model = model;
         initialize();
@@ -94,7 +95,8 @@ public class JChronograph  extends JPanel {
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            LayoutManager layout) {
+            LayoutManager    layout)
+    {
         super(layout);
         this.model = model;
         initialize();
@@ -103,35 +105,48 @@ public class JChronograph  extends JPanel {
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
-            boolean isDoubleBuffered) {
+            boolean          isDoubleBuffered)
+    {
         super(isDoubleBuffered);
         this.model = model;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
-    public JChronograph(ChronographModel model) {
+    public JChronograph(
+            ChronographModel model)
+    {
         this.model = model;
         initialize();
     }
 
     @SuppressWarnings("this-escape")
-    public JChronograph(String name) {
+    public JChronograph() {
         this.model = new DefaultChronographModel();
         initialize();
     }
 
     private void initialize() {
-        String zero  = format_timestamp(0, format);
-        JPanel panel = new JPanel();
-        ((FlowLayout) panel.getLayout()).setAlignOnBaseline(true);
-        panel.setBorder(
-                title = new TitledBorder(
-                        new EtchedBorder(EtchedBorder.LOWERED),
-                        model.getName()));
-        model.addPropertyChangeListener(NAME_PROPERTY, e -> {
-            title.setTitle((String) e.getNewValue());
-        });
+
+        String zero          = format_timestamp(0, format);
+        JPanel panel         = new JPanel();
+        LayoutManager layout = panel.getLayout();
+        if (layout instanceof FlowLayout) {
+            ((FlowLayout) layout).setAlignOnBaseline(true);
+        }
+
+        /* CONFIGURE THE PANEL */
+        title = new TitledBorder(
+                new EtchedBorder(EtchedBorder.LOWERED),
+                model.getName());
+        panel.setBorder(title);
+        model.addPropertyChangeListener(
+                NAME_PROPERTY,
+                e -> {
+                    title.setTitle((String) e.getNewValue());
+                });
+
+        /* CONFIGURE THE TOTAL LABEL */
         total = new JLabel("total");
         total.setBorder(
                 new TitledBorder(
@@ -140,7 +155,8 @@ public class JChronograph  extends JPanel {
         total.setText(zero);
         panel.add(total);
 
-        lapse = new JLabel(format_timestamp(0, format));
+        /* CONFIGURE THE LAPSE LABEL */
+        lapse = new JLabel("lapse");
         lapse.setBorder(
                 new TitledBorder(
                         new EtchedBorder(EtchedBorder.LOWERED),
@@ -148,7 +164,10 @@ public class JChronograph  extends JPanel {
         lapse.setText(zero);
         panel.add(lapse);
 
-        model.addPropertyChangeListener(RESET_ACTION, evt -> {
+        /* ADD THE PROPERTY CHANGE LISTENERS TO THE MODEL */
+        model.addPropertyChangeListener(
+                RESET_ACTION,
+                evt -> {
                     if (model.isRunning()) {
                         update((long[])evt.getOldValue());
                         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
@@ -158,38 +177,48 @@ public class JChronograph  extends JPanel {
                         timer.setInitialDelay(DEFAULT_DELAY);
                     }
                 });
-        model.addPropertyChangeListener(START_ACTION, evt -> {
+        model.addPropertyChangeListener(
+                START_ACTION,
+                evt -> {
                     update((long[]) evt.getNewValue());
                     timer.setInitialDelay(DEFAULT_DELAY);
                     timer.start();
                 });
-        model.addPropertyChangeListener(RESTART_ACTION, evt -> {
+        model.addPropertyChangeListener(
+                RESTART_ACTION,
+                evt -> {
                     timer.stop();
                     update((long[]) evt.getOldValue());
                     timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                     timer.start();
                 });
-        model.addPropertyChangeListener(LAPSE_ACTION, evt -> {
+        model.addPropertyChangeListener(
+                LAPSE_ACTION,
+                evt -> {
                     timer.stop();
                     update((long[]) evt.getOldValue());
                     timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                     timer.start();
                 });
-        model.addPropertyChangeListener(STOP_ACTION, evt -> {
+        model.addPropertyChangeListener(
+                STOP_ACTION,
+                evt -> {
                     timer.stop();
                     update((long[]) evt.getOldValue());
                 });
 
-        timer = new Timer(DEFAULT_DELAY, e -> {
-            // if (!model.isRunning()) return; // CAN BE SPURIOUS?
-            update(model.getIntervals(model.getTimestamp()));
-            timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
-        });
-
+        /* CONFIGURE THE TIMER */
+        timer = new Timer(
+                DEFAULT_DELAY,
+                e -> {
+                    update(model.getIntervals(model.getTimestamp()));
+                    timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
+                });
         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         timer.setCoalesce(true);
         timer.addActionListener(timerListener);
 
+        /* CONFIGURE START/LAPSE BUTTON */
         startAction = new AbstractAction("Start") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -199,8 +228,7 @@ public class JChronograph  extends JPanel {
         startAndLapse = new JButton(startAction);
         panel.add(startAndLapse);
 
-        /* this will be used when changing startAndLapse JButton to this
-         * action. */
+        /* LAPSE ACTION */
         lapseAction = new AbstractAction("Lapse") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -208,14 +236,18 @@ public class JChronograph  extends JPanel {
             }
         };
 
-        model.addPropertyChangeListener(RUNNING_PROPERTY, evt ->{
-            if (model.isRunning()) {
-                startAndLapse.setAction(lapseAction);
-            } else {
-                startAndLapse.setAction(startAction);
-            }
-        });
+        /* CONFIGURE THE RUNNING PROPERTY CHANGE LISTENER */
+        model.addPropertyChangeListener(
+                RUNNING_PROPERTY,
+                evt -> {
+                    if (model.isRunning()) {
+                        startAndLapse.setAction(lapseAction);
+                    } else {
+                        startAndLapse.setAction(startAction);
+                    }
+                });
 
+        /* CONFIGURE THE STOP BUTTON */
         stop = new JButton(new AbstractAction("Stop") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -224,6 +256,7 @@ public class JChronograph  extends JPanel {
         });
         panel.add(stop);
 
+        /* CONFIGURE THE RESET BUTTON */
         reset = new JButton(new AbstractAction("Reset") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -232,8 +265,8 @@ public class JChronograph  extends JPanel {
         });
         panel.add(reset);
 
+        /* ADD THE PANEL TO this */
         add(panel);
-        model.reset(System.currentTimeMillis());
     }
 
     private void update(long[] values) {
@@ -245,15 +278,21 @@ public class JChronograph  extends JPanel {
         return model;
     }
 
+    @Override
     public String getName() {
         return model.getName();
     }
 
+    @Override
     public void setName(String new_name) {
         model.setName(new_name);
     }
 
-    public Timer getTimer() {
-        return timer;
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 }

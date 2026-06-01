@@ -42,21 +42,19 @@ import es.lcssl.chrono.gui.DefaultChronographModel;
 public class Main {
 
     public static final void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
+        if (args.length == 0) {
+            System.err.println(
+                    "Must specify parameters to name the chronographs.");
+        }
+        EventQueue.invokeLater(() -> {
+            for (String title : args) {
                 JFrame frame = new JFrame("Chronograph V1.0");
-                ChronographModel model = new DefaultChronographModel();
-                model.setName("Cronómetro");
-                JChronograph chron1 = new JChronograph(model),
-                        chron2 = new JChronograph(model);
-                JPanel content = new JPanel();
-                frame.setContentPane(content);
-                content.add(chron1);
-                content.add(chron2);
+                frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+                JChronograph crono = new JChronograph();
+                crono.getModel().setName(title);
+                frame.setContentPane(crono);
                 frame.pack();
                 frame.setVisible(true);
-                frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
             }
         });
     }
