@@ -28,16 +28,17 @@ package es.lcssl.chrono.gui;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.FlowLayout;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.Timer;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import static java.text.MessageFormat.format;
-import static javax.swing.JSeparator.VERTICAL;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RESET_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.START_ACTION;
@@ -46,13 +47,6 @@ import static es.lcssl.chrono.gui.ChronographModel.LAPSE_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import javax.swing.WindowConstants;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -64,8 +58,6 @@ public class JChronograph  extends JPanel {
 
     public static final int DEFAULT_INITIAL_DELAY = 5000;
     public static final int DEFAULT_DELAY         =   47;
-
-    String                   name;
 
     private JLabel           total,
                              lapse;
@@ -91,7 +83,6 @@ public class JChronograph  extends JPanel {
             boolean isDoubleBuffered,
             String name) {
         super(layout, isDoubleBuffered);
-		this.name  = name;
         this.model = model;
         this.name  = name;
         initialize();
@@ -104,7 +95,6 @@ public class JChronograph  extends JPanel {
             LayoutManager layout,
             String name) {
         super(layout);
-		this.name  = name;
         this.model = model;
         this.name  = name;
         initialize();
@@ -116,7 +106,6 @@ public class JChronograph  extends JPanel {
             boolean isDoubleBuffered,
             String name) {
         super(isDoubleBuffered);
-		this.name  = name;
         this.model = model;
         this.name  = name;
         initialize();

@@ -30,6 +30,8 @@ import java.beans.PropertyChangeSupport;
 import java.util.function.Supplier;
 
 import static java.text.MessageFormat.format;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class to manage a chronograph. The time is based on a {@code long}
@@ -40,6 +42,7 @@ import static java.text.MessageFormat.format;
  */
 public class DefaultChronographModel implements ChronographModel {
 
+    private static final Logger   log = LogManager.getLogger();
 
     private long                  startTime,
                                   lapseTime,
@@ -63,10 +66,16 @@ public class DefaultChronographModel implements ChronographModel {
     
     @Override
     public void reset(long ts) {
-        long[]  old_values    = getIntervals(ts);
+        long[] old_values = getIntervals(ts);
         startTime = lapseTime = stopTime = ts;
+        long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESET_ACTION,
-                old_values, getIntervals(ts));
+                old_values, new_values);
+        log.info("{}: ts={}, OLD: Total={},"
+                + " Lapse={}; NEW: Total={}, Lapse={}",
+                RESET_ACTION, ts,
+                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
+                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
 
     @Override
@@ -78,10 +87,16 @@ public class DefaultChronographModel implements ChronographModel {
         startTime += time_stopped;
         lapseTime += time_stopped;
         running    = true;
+        long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RUNNING_PROPERTY,
                 false, running);
         pcs.firePropertyChange(START_ACTION,
                 old_values, getIntervals(ts));
+        log.info("{}: ts={}, OLD: Total={},"
+                + " Lapse={}; NEW: Total={}, Lapse={}",
+                START_ACTION, ts,
+                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
+                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
 
     @Override
@@ -89,14 +104,19 @@ public class DefaultChronographModel implements ChronographModel {
         if (!running) return;
         
         long[] old_values = getIntervals(ts);
-        
         running  = false;
         stopTime = ts;
+        long[]  new_values    = getIntervals(ts);
         
         pcs.firePropertyChange(RUNNING_PROPERTY,
                 true, false);
         pcs.firePropertyChange(STOP_ACTION,
                 old_values, getIntervals(ts));
+        log.info("{}: ts={}, OLD: Total={},"
+                + " Lapse={}; NEW: Total={}, Lapse={}",
+                STOP_ACTION, ts,
+                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
+                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
 
     @Override
@@ -104,19 +124,30 @@ public class DefaultChronographModel implements ChronographModel {
         if (!running) return;
 
         long[] old_values = getIntervals(ts);
-        
         startTime = lapseTime = ts;
-        
+        long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESTART_ACTION,
-                old_values, getIntervals(ts));
+                old_values, new_values);
+        log.info("{}: ts={}, OLD: Total={},"
+                + " Lapse={}; NEW: Total={}, Lapse={}",
+                RESTART_ACTION,
+                ts,
+                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
+                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
 
     @Override
     public void lapse(long ts) {
-        long[] old_intervals = getIntervals(ts);
+        long[] old_values = getIntervals(ts);
         lapseTime = ts;
+        long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(LAPSE_ACTION,
-                old_intervals, getIntervals(ts));
+                old_values, new_values);
+        log.info("{}: ts={}, OLD: Total={},"
+                + " Lapse={}; NEW: Total={}, Lapse={}",
+                LAPSE_ACTION, ts,
+                old_values[TOTAL_TIME], old_values[LAPSE_TIME],
+                new_values[TOTAL_TIME], new_values[LAPSE_TIME]);
     }
 
     @Override

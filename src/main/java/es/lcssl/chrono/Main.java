@@ -25,15 +25,15 @@
  */
 package es.lcssl.chrono;
 
-import es.lcssl.chrono.gui.ChronographModel;
-import es.lcssl.chrono.gui.DefaultChronographModel;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
-
-import es.lcssl.chrono.gui.JChronograph;
 import javax.swing.JPanel;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+
+import es.lcssl.chrono.gui.JChronograph;
+import es.lcssl.chrono.gui.ChronographModel;
+import es.lcssl.chrono.gui.DefaultChronographModel;
 
 /**
  *
@@ -59,5 +59,4 @@ public class Main {
             }
         });
     }
-
 }
