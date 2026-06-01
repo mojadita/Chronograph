@@ -63,7 +63,7 @@ public class DefaultChronographModel implements ChronographModel {
     public DefaultChronographModel() {
         this(System::currentTimeMillis);
     }
-    
+
     @Override
     public void reset(long ts) {
         long[] old_values = getIntervals(ts);
@@ -81,7 +81,7 @@ public class DefaultChronographModel implements ChronographModel {
     @Override
     public void start(long ts) { /* this binds TOTAL_PROPERTY */
         if (running) return;
-        
+
         long[] old_values = getIntervals(ts);
         long time_stopped = ts - stopTime;
         startTime += time_stopped;
@@ -102,12 +102,12 @@ public class DefaultChronographModel implements ChronographModel {
     @Override
     public void stop(long ts) {
         if (!running) return;
-        
+
         long[] old_values = getIntervals(ts);
         running  = false;
         stopTime = ts;
         long[]  new_values    = getIntervals(ts);
-        
+
         pcs.firePropertyChange(RUNNING_PROPERTY,
                 true, false);
         pcs.firePropertyChange(STOP_ACTION,
@@ -179,7 +179,7 @@ public class DefaultChronographModel implements ChronographModel {
     public boolean isRunning() {
         return running;
     }
-    
+
     @Override
     public long getTimestamp() {
         return timestamper.get();
@@ -201,5 +201,5 @@ public class DefaultChronographModel implements ChronographModel {
             String                 property_name,
             PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(property_name, listener);
-    }    
+    }
 }

@@ -68,13 +68,13 @@ public class JChronograph  extends JPanel {
     private ChronographModel model;
     private Timer            timer;
 
-    private transient ActionListener   
+    private transient ActionListener
                              timerListener;
 
     private transient Action startAction,
                              lapseAction;
 
-	private String           name;
+    private String           name;
 
     @SuppressWarnings("this-escape")
     public JChronograph(
@@ -86,7 +86,7 @@ public class JChronograph  extends JPanel {
         this.model = model;
         this.name  = name;
         initialize();
-		/* don't put anything after initialize() */
+        /* don't put anything after initialize() */
     }
 
     @SuppressWarnings("this-escape")
@@ -140,7 +140,7 @@ public class JChronograph  extends JPanel {
                         "Total"));
         total.setText(zero);
         panel.add(total);
-        
+
         lapse = new JLabel(format_timestamp(0));
         lapse.setBorder(
                 new TitledBorder(
@@ -180,13 +180,13 @@ public class JChronograph  extends JPanel {
                     timer.stop();
                     update((long[]) evt.getOldValue());
                 });
-        
+
         timer = new Timer(DEFAULT_DELAY, e -> {
             // if (!model.isRunning()) return; // CAN BE SPURIOUS?
             update(model.getIntervals(model.getTimestamp()));
             timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         });
-        
+
         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
         timer.setCoalesce(true);
         timer.addActionListener(timerListener);
@@ -208,7 +208,7 @@ public class JChronograph  extends JPanel {
                 model.lapse(e.getWhen());
             }
         };
-        
+
         model.addPropertyChangeListener(RUNNING_PROPERTY, evt ->{
             if (model.isRunning()) {
                 startAndLapse.setAction(lapseAction);
@@ -244,7 +244,7 @@ public class JChronograph  extends JPanel {
             mods[i] = (int) (ts % dividers[i]);
             ts /= dividers[i];
         }
-		/* ts holds finally the number of days of the time */
+        /* ts holds finally the number of days of the time */
         String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
                s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
                         mods[3], mods[2], mods[1]),
