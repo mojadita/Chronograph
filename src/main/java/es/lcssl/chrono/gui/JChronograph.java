@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import org.apache.logging.log4j.Logger;
 
 import static es.lcssl.chrono.gui.ChronographModel.NAME_PROPERTY;
 import static es.lcssl.chrono.gui.ChronographModel.RUNNING_PROPERTY;
@@ -48,6 +49,7 @@ import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class implements a single chronograph with start/lapse and stop buttons
@@ -58,11 +60,13 @@ import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
 public class JChronograph  extends JPanel {
 
     public static final int  DEFAULT_INITIAL_DELAY = 5000;
-    public static final int  DEFAULT_DELAY         =   47;
+    public static final int  DEFAULT_DELAY         =   47;    
+    
+    public static final Logger LOG = LogManager.getLogger(JChronograph.class);
 
     private JLabel           total,
                              lapse;
-    private JButton          startAndLapse,
+    private JButtonForChrono startAndLapse,
                              stop,
                              reset;
 
@@ -222,17 +226,27 @@ public class JChronograph  extends JPanel {
         startAction = new AbstractAction("Start") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.start(e.getWhen());
+                //model.start(e.getWhen());
+                model.start(startAndLapse.getLastButtonPressEvent().getWhen());
+                LOG.debug("{}: button click delay: {}ms.",
+                        getName(), 
+                        (e.getWhen() 
+                                - startAndLapse.getLastButtonPressEvent().getWhen()));
             }
         };
-        startAndLapse = new JButton(startAction);
+        startAndLapse = new JButtonForChrono(startAction);
         panel.add(startAndLapse);
 
         /* LAPSE ACTION */
         lapseAction = new AbstractAction("Lapse") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.lapse(e.getWhen());
+                //model.lapse(e.getWhen());
+                model.lapse(startAndLapse.getLastButtonPressEvent().getWhen());
+                LOG.debug("{}: button click delay: {}ms.",
+                        getName(), 
+                        (e.getWhen() 
+                                - startAndLapse.getLastButtonPressEvent().getWhen()));
             }
         };
 
@@ -248,19 +262,29 @@ public class JChronograph  extends JPanel {
                 });
 
         /* CONFIGURE THE STOP BUTTON */
-        stop = new JButton(new AbstractAction("Stop") {
+        stop = new JButtonForChrono(new AbstractAction("Stop") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.stop(e.getWhen());
+                //model.stop(e.getWhen());
+                model.stop(stop.getLastButtonPressEvent().getWhen());
+                LOG.debug("{}: button click delay: {}ms.",
+                        getName(), 
+                        (e.getWhen() 
+                                - stop.getLastButtonPressEvent().getWhen()));
             }
         });
         panel.add(stop);
 
         /* CONFIGURE THE RESET BUTTON */
-        reset = new JButton(new AbstractAction("Reset") {
+        reset = new JButtonForChrono(new AbstractAction("Reset") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.reset(e.getWhen());
+                //model.reset(e.getWhen());
+                model.reset(reset.getLastButtonPressEvent().getWhen());
+                LOG.debug("{}: button click delay: {}ms.",
+                        getName(), 
+                        (e.getWhen() 
+                                - reset.getLastButtonPressEvent().getWhen()));
             }
         });
         panel.add(reset);

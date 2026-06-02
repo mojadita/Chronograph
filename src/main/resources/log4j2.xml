@@ -20,8 +20,8 @@
       <AppenderRef ref="CONSOLE" level="WARN"/>
       <AppenderRef ref="MAIN"/>
     </Root>
-    <Logger name="org.example" level="DEBUG">
-      <AppenderRef ref="DEBUG_LOG"/>
+    <Logger name="es.lcssl" level="DEBUG">
+      <AppenderRef ref="CONSOLE"/>
     </Logger>
   </Loggers>
 </Configuration>
