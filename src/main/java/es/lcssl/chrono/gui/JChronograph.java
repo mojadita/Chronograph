@@ -31,7 +31,6 @@ import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -82,7 +81,7 @@ public class JChronograph  extends JPanel {
                              lapseAction;
 
     private String           format =
-            "<html><font size=+1>{0}{1}</font>.{2}";
+            "<html><font size=+2>{0}{1}</font>.{2}";
 
     @SuppressWarnings("this-escape")
     public JChronograph(

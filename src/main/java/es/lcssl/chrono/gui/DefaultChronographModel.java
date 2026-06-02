@@ -115,7 +115,7 @@ public class DefaultChronographModel implements ChronographModel {
         pcs.firePropertyChange(RUNNING_PROPERTY,
                 false, running);
         pcs.firePropertyChange(START_ACTION,
-                old_values, getIntervals(ts));
+                old_values, new_values);
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, START_ACTION, ts,
@@ -137,7 +137,7 @@ public class DefaultChronographModel implements ChronographModel {
         pcs.firePropertyChange(RUNNING_PROPERTY,
                 true, false);
         pcs.firePropertyChange(STOP_ACTION,
-                old_values, getIntervals(ts));
+                old_values, new_values);
         log.info("{}: {}: ts={}, OLD: Total={},"
                 + " Lapse={}; NEW: Total={}, Lapse={}",
                 name, STOP_ACTION, ts,
