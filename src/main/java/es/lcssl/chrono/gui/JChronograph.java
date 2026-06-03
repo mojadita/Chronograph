@@ -84,7 +84,7 @@ public class JChronograph  extends JPanel {
                              lapseAction;
 
     private String           format =
-            "<html><font size=+2>{0}{1}</font>.{2}";
+            "<html><font size=+2>{0}{1}</font>{2}";
 
     @SuppressWarnings("this-escape")
     public JChronograph(
@@ -145,6 +145,9 @@ public class JChronograph  extends JPanel {
         if (layout instanceof FlowLayout) {
             ((FlowLayout) layout).setAlignOnBaseline(true);
         }
+        
+        format =
+            "<html><font size=+2>{0}{1}</font>{2}";
 
         /* CONFIGURE THE PANEL */
         title = new TitledBorder(
