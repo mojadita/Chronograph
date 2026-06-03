@@ -68,6 +68,7 @@ public interface ChronographModel {
 
     void addPropertyChangeListener(
             String property_name, PropertyChangeListener listener);
+
     void removePropertyChangeListener(
             String property_name, PropertyChangeListener listener);
 
@@ -79,12 +80,10 @@ public interface ChronographModel {
             ts /= dividers[i];
         }
         /* ts holds finally the number of days of the time */
-        String s1 = ts > 0 ? format("{0,number,##000}d ", ts) : "",
+        String s1 = ts > 0 ? format("{0,number,##0}d ", ts) : "",
                s2 = format("{0,number,00}:{1,number,00}:{2,number,00}",
                         mods[3], mods[2], mods[1]),
-               s3 = format("{0,number,000}",
-                        mods[0]);
-        return format(format,
-                s1, s2, s3);
+               s3 = format(".{0,number,000}", mods[0]);
+        return format(format, s1, s2, s3);
     }
 }

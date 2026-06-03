@@ -48,7 +48,7 @@ public class Main {
         }
         EventQueue.invokeLater(() -> {
             for (String title : args) {
-                JFrame frame = new JFrame("Chronograph V1.0");
+                JFrame frame = new JFrame("Chronograph V1.0 - " + title);
                 frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
                 JChronograph crono = new JChronograph();
                 crono.getModel().setName(title);

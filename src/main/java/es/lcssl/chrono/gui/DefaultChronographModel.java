@@ -47,7 +47,7 @@ public class DefaultChronographModel implements ChronographModel {
     private static final Logger   log =
             LogManager.getLogger(DefaultChronographModel.class);
 
-    private static final String FORMAT = "{0}{1}.{2}";
+    private static final String FORMAT = "{0}{1}{2}";
 
     private long                  startTime,
                                   lapseTime,
@@ -183,7 +183,10 @@ public class DefaultChronographModel implements ChronographModel {
 
     @Override
     public long[] getIntervals(long ts) {
-        return new long[] { ts - startTime, ts - lapseTime };
+        long stop_correction = isRunning() ? 0 : ts - stopTime;
+        return new long[] {
+            ts - startTime - stop_correction,
+            ts - lapseTime - stop_correction };
     }
 
     @Override
