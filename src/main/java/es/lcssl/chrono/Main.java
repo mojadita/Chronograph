@@ -27,19 +27,21 @@ package es.lcssl.chrono;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import es.lcssl.chrono.gui.JChronograph;
-import es.lcssl.chrono.gui.ChronographModel;
-import es.lcssl.chrono.gui.DefaultChronographModel;
+import java.util.ResourceBundle;
 
 /**
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class Main {
+    
+    static final ResourceBundle INTL =
+            ResourceBundle.getBundle(Main.class.getName());
+
 
     public static final void main(String[] args) {
         if (args.length == 0) {
@@ -48,7 +50,8 @@ public class Main {
         }
         EventQueue.invokeLater(() -> {
             for (String title : args) {
-                JFrame frame = new JFrame("Chronograph V1.0 - " + title);
+                JFrame frame = new JFrame(INTL.getString(
+                        "PROGRAM_NAME_AND_VERSION") + " - " + title);
                 frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
                 JChronograph crono = new JChronograph();
                 crono.getModel().setName(title);

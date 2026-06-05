@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.ImageIcon;
 import org.apache.logging.log4j.Logger;
 import java.awt.Font;
 import org.apache.logging.log4j.LogManager;
@@ -51,6 +52,7 @@ import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
 import java.io.FileInputStream;
+import java.net.URL;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
@@ -287,6 +289,9 @@ public class JChronograph  extends JPanel {
                                 - stop.getLastButtonPressEvent().getWhen()));
             }
         });
+        String location = getClass().getClassLoader().getResource("images/stop.svg").getFile();
+        LOG.info("location: {}", location);
+        stop.setIcon(new ImageIcon(location));
         add(stop);
 
         /* CONFIGURE THE RESET BUTTON */
