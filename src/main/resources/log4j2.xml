@@ -20,7 +20,7 @@
       <AppenderRef ref="CONSOLE" level="WARN"/>
       <AppenderRef ref="MAIN"/>
     </Root>
-    <Logger name="es.lcssl" level="DEBUG">
+    <Logger name="es.lcssl" level="FATAL">
       <AppenderRef ref="CONSOLE"/>
     </Logger>
   </Loggers>

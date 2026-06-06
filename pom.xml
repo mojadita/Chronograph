@@ -9,7 +9,7 @@
     
     <groupId>es.lcssl.chrono</groupId>
     <artifactId>Chronograph</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>1.0-alpha</version>
     <packaging>jar</packaging>
     <name>Chronograph stopwatch</name>
     <description>

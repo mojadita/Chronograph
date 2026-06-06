@@ -46,7 +46,7 @@ public class Main {
     public static final void main(String[] args) {
         if (args.length == 0) {
             System.err.println(
-                    "Must specify parameters to name the chronographs.");
+                    INTL.getString("HELP_STRING"));
         }
         EventQueue.invokeLater(() -> {
             for (String title : args) {

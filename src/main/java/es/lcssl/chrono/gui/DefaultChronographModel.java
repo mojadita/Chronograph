@@ -52,8 +52,7 @@ public class DefaultChronographModel implements ChronographModel {
 
     private static final String   FORMAT = "{0}{1}{2}";
 
-    private static final String   FORMAT_LOG =
-            INTL.getString("FORMAT_LOG");
+    private static final String   FORMAT_LOG = INTL.getString("FORMAT_LOG");
 
     private long                  startTime,
                                   lapseTime,
