@@ -121,8 +121,7 @@ public class DefaultChronographModel implements ChronographModel {
                 false, running);
         pcs.firePropertyChange(START_ACTION,
                 old_values, new_values);
-        log.info("{}: {}: ts={}, OLD: Total={},"
-                + " Lapse={}; NEW: Total={}, Lapse={}",
+        log.info(FORMAT_LOG,
                 name, START_ACTION, ts,
                 format_timestamp(old_values[TOTAL_TIME], FORMAT),
                 format_timestamp(old_values[LAPSE_TIME], FORMAT),
@@ -143,8 +142,7 @@ public class DefaultChronographModel implements ChronographModel {
                 true, false);
         pcs.firePropertyChange(STOP_ACTION,
                 old_values, new_values);
-        log.info("{}: {}: ts={}, OLD: Total={},"
-                + " Lapse={}; NEW: Total={}, Lapse={}",
+        log.info(FORMAT_LOG,
                 name, STOP_ACTION, ts,
                 format_timestamp(old_values[TOTAL_TIME], FORMAT),
                 format_timestamp(old_values[LAPSE_TIME], FORMAT),
@@ -161,8 +159,7 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESTART_ACTION,
                 old_values, new_values);
-        log.info("{}: {}: ts={}, OLD: Total={},"
-                + " Lapse={}; NEW: Total={}, Lapse={}",
+        log.info(FORMAT_LOG,
                 name, RESTART_ACTION, ts,
                 format_timestamp(old_values[TOTAL_TIME], FORMAT),
                 format_timestamp(old_values[LAPSE_TIME], FORMAT),
@@ -177,8 +174,7 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(LAPSE_ACTION,
                 old_values, new_values);
-        log.info("{}: {}: ts={}, OLD: Total={},"
-                + " Lapse={}; NEW: Total={}, Lapse={}",
+        log.info(FORMAT_LOG,
                 name, LAPSE_ACTION, ts,
                 format_timestamp(old_values[TOTAL_TIME], FORMAT),
                 format_timestamp(old_values[LAPSE_TIME], FORMAT),

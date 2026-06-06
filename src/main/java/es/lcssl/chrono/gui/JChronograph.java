@@ -50,6 +50,7 @@ import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
+import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
@@ -240,8 +241,7 @@ public class JChronograph  extends JPanel {
                 _res_("START_ACTION_NAME"),
                 new ImageIcon(getClass()
                         .getClassLoader()
-                        .getResource("images/start.png")
-                        .getFile()))
+                        .getResource(INTL.getString("START_ICON"))))
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -263,8 +263,7 @@ public class JChronograph  extends JPanel {
                 _res_("LAPSE_ACTION_NAME"),
                 new ImageIcon(getClass()
                         .getClassLoader()
-                        .getResource("images/lapse.png")
-                        .getFile()))
+                        .getResource(INTL.getString("LAPSE_ICON"))))
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -293,8 +292,7 @@ public class JChronograph  extends JPanel {
                 _res_("STOP_ACTION_NAME"),
                 new ImageIcon(getClass()
                         .getClassLoader()
-                        .getResource("images/stop.png")
-                        .getFile()))
+                        .getResource(INTL.getString("STOP_ICON"))))
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -315,8 +313,7 @@ public class JChronograph  extends JPanel {
                 _res_("RESET_ACTION_NAME"),
                 new ImageIcon(getClass()
                         .getClassLoader()
-                        .getResource("images/reset.png")
-                        .getFile())) {
+                        .getResource(INTL.getString("RESET_ICON")))) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //model.reset(e.getWhen());

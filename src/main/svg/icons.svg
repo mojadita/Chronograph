@@ -7,9 +7,9 @@
    viewBox="0 0 512 512"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
    sodipodi:docname="icons.svg"
-   inkscape:export-filename="lapse.png"
+   inkscape:export-filename="../resources/images/lapse.png"
    inkscape:export-xdpi="6"
    inkscape:export-ydpi="6"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -29,14 +29,14 @@
      showguides="true"
      showgrid="false"
      inkscape:zoom="1.4142136"
-     inkscape:cx="252.43711"
-     inkscape:cy="293.09575"
-     inkscape:window-width="1904"
-     inkscape:window-height="1077"
-     inkscape:window-x="63"
-     inkscape:window-y="35"
+     inkscape:cx="251.73001"
+     inkscape:cy="292.7422"
+     inkscape:window-width="1810"
+     inkscape:window-height="949"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer4">
+     inkscape:current-layer="layer3">
     <sodipodi:guide
        position="255.97265,262.4797"
        orientation="1,0"
@@ -88,8 +88,8 @@
      inkscape:label="stop"
      inkscape:groupmode="layer"
      id="layer1"
-     sodipodi:insensitive="true"
-     style="display:none">
+     style="display:none"
+     sodipodi:insensitive="true">
     <path
        sodipodi:type="star"
        id="path2"
@@ -109,35 +109,51 @@
        inkscape:transform-center-x="-0.5"
        inkscape:export-filename="path2.png"
        inkscape:export-xdpi="6.7454076"
-       inkscape:export-ydpi="6.7454076" />
+       inkscape:export-ydpi="6.7454076"
+       sodipodi:insensitive="true" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;line-height:1.25;font-family:OCR-B;-inkscape-font-specification:'OCR-B, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
-       x="46.996094"
-       y="308.96875"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;line-height:1.25;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
+       x="88.959976"
+       y="299.32001"
        id="text2"
        inkscape:transform-center-x="-0.5000039"
-       inkscape:transform-center-y="-1.1553449e-05"><tspan
+       inkscape:transform-center-y="-1.1553449e-05"
+       sodipodi:insensitive="true"><tspan
          sodipodi:role="line"
          id="tspan2"
-         x="46.996094"
-         y="308.96875"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:OCR-B;-inkscape-font-specification:'OCR-B, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">STOP</tspan><tspan
+         x="88.959976"
+         y="299.32001"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">STOP</tspan><tspan
          sodipodi:role="line"
-         x="46.996094"
-         y="458.96875"
+         x="88.959976"
+         y="449.32001"
          id="tspan3"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:OCR-B;-inkscape-font-specification:'OCR-B, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25" /></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;line-height:1.25;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:none;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
+       x="92.44001"
+       y="299.26004"
+       id="text5"
+       inkscape:transform-center-x="-0.5000039"
+       inkscape:transform-center-y="-1.1553449e-05"
+       sodipodi:insensitive="true"><tspan
+         sodipodi:role="line"
+         x="0"
+         y="0"
+         id="tspan5"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">PARE</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="reset"
-     sodipodi:insensitive="true"
-     style="display:none">
+     style="display:none"
+     sodipodi:insensitive="true">
     <path
        sodipodi:type="star"
-       style="fill:#ffff00;fill-opacity:1;stroke-width:1.2;stroke-dasharray:none"
+       style="fill:#ffff00;fill-opacity:1;stroke:#000000;stroke-width:10;stroke-dasharray:none;stroke-opacity:1"
        id="path4"
        inkscape:flatsided="false"
        sodipodi:sides="5"
@@ -155,14 +171,17 @@
        transform="translate(0.34549089,17.448693)"
        inkscape:export-filename="reset.png"
        inkscape:export-xdpi="8.9535904"
-       inkscape:export-ydpi="8.9535904" />
+       inkscape:export-ydpi="8.9535904"
+       sodipodi:insensitive="true" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="Capa 2">
+     inkscape:label="Capa 2"
+     style="display:none"
+     sodipodi:insensitive="true">
     <ellipse
-       style="display:none;fill:#0000ff"
+       style="display:inline;fill:#0000ff"
        id="path1"
        cx="256"
        cy="256"
@@ -170,16 +189,14 @@
        ry="227.25"
        inkscape:export-filename="start.png"
        inkscape:export-xdpi="6.7442369"
-       inkscape:export-ydpi="6.7442369"
-       sodipodi:insensitive="true" />
+       inkscape:export-ydpi="6.7442369" />
     <g
        id="g3"
        transform="translate(-15.5)"
-       style="display:none"
-       sodipodi:insensitive="true">
+       style="display:inline">
       <path
          sodipodi:type="star"
-         style="fill:#ffffff"
+         style="display:inline;fill:#ffffff"
          id="path3"
          inkscape:flatsided="false"
          sodipodi:sides="3"
@@ -196,7 +213,7 @@
          inkscape:transform-center-y="-0.5"
          transform="translate(0,0.24999811)" />
       <rect
-         style="fill:#ffffff"
+         style="display:inline;fill:#ffffff"
          id="rect3"
          width="214"
          height="72"
@@ -208,7 +225,7 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="lapse"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <rect
        style="fill:#0000ff;stroke:#ffffff;stroke-width:11.5238;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        id="rect1"
@@ -222,13 +239,13 @@
        inkscape:export-ydpi="6.741827" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:400px;font-family:OCR-B;-inkscape-font-specification:'OCR-B, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:1.2"
-       x="82.953125"
-       y="429.63281"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:400px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:1.2"
+       x="120.59999"
+       y="400.40002"
        id="text1"><tspan
          sodipodi:role="line"
          id="tspan1"
-         x="82.953125"
-         y="429.63281">P</tspan></text>
+         x="120.59999"
+         y="400.40002">P</tspan></text>
   </g>
 </svg>
