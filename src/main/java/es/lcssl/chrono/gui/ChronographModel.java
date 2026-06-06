@@ -72,7 +72,7 @@ public interface ChronographModel {
     void removePropertyChangeListener(
             String property_name, PropertyChangeListener listener);
 
-    public static String format_timestamp(long ts, String format) {
+    public static String  format_timestamp(long ts, String format) {
         int[] dividers = {1000, 60, 60, 24};
         int[] mods = new int[dividers.length];
         for (int i = 0; i < dividers.length; ++i) {

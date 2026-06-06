@@ -19,37 +19,37 @@ import javax.swing.WindowConstants;
 @SuppressWarnings("serial")
 public class JButtonForChrono extends JButton {
 
-		MouseEvent lastButtonPressEvent;
-        
+        MouseEvent lastButtonPressEvent;
+
         @SuppressWarnings("this-escape")
-		public JButtonForChrono(Action action) {
-			super(action);
-			addMouseListener(new MouseAdapter() {
+        public JButtonForChrono(Action action) {
+            super(action);
+            addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent evt) {
                     lastButtonPressEvent = evt;
                 }
             });
-		}
+        }
 
     public MouseEvent getLastButtonPressEvent() {
         return lastButtonPressEvent;
     }
-    
+
     /**
      * This main routine is left to allow to test the JButtonForChrono,
      * creating a single window with an instance of this class, to compute
      * the difference between the button activation timestamp and the
      * previous button press mouse event.  This should be equal to the
      * interval between the button press and button release of the mouse.
-     * 
-     * @param args  not used. 
+     *
+     * @param args  not used.
      */
     public static void main(String[] args) {
         JFrame frame  = new JFrame("Prueba de JButtonForChrono");
-        
+
         JButtonForChrono button = new JButtonForChrono(null);
-        
+
         Action action = new AbstractAction("Press me!") {
             @Override
             public void actionPerformed(ActionEvent e) {

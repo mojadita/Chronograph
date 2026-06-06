@@ -27,7 +27,6 @@ package es.lcssl.chrono.gui;
 
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -51,9 +50,6 @@ import static es.lcssl.chrono.gui.ChronographModel.STOP_ACTION;
 import static es.lcssl.chrono.gui.ChronographModel.TOTAL_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.LAPSE_TIME;
 import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
-import java.io.FileInputStream;
-import java.net.URL;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**
@@ -64,12 +60,13 @@ import java.util.ResourceBundle;
 @SuppressWarnings("serial")
 public class JChronograph  extends JPanel {
 
-    public static final int     DEFAULT_INITIAL_DELAY = 5000;
-    public static final int     DEFAULT_DELAY         =   47;
-    
-    public static final Logger LOG = LogManager.getLogger(JChronograph.class);
-    
-    private ResourceBundle INTL;
+    public static final int  DEFAULT_INITIAL_DELAY = 5000;
+    public static final int  DEFAULT_DELAY         =   47;
+
+    public static final Logger
+                             LOG = LogManager.getLogger(JChronograph.class);
+
+    private ResourceBundle   INTL;
 
     private JLabel           total,
                              lapse;
@@ -137,7 +134,7 @@ public class JChronograph  extends JPanel {
     private String _res_(String name) {
         return INTL.getString(name);
     }
-    
+
     private void initialize() {
 
         INTL = ResourceBundle.getBundle(getClass().getName());
@@ -147,7 +144,7 @@ public class JChronograph  extends JPanel {
         if (layout instanceof FlowLayout) {
             ((FlowLayout) layout).setAlignOnBaseline(true);
         }
-        
+
         format =
             "<html><font size=+2>{0}{1}</font>{2}";
 
@@ -188,7 +185,7 @@ public class JChronograph  extends JPanel {
                 RESET_ACTION,
                 evt -> {
                     if (model.isRunning()) {
-						timer.stop();
+                        timer.stop();
                         update((long[])evt.getOldValue());
                         timer.setInitialDelay(DEFAULT_INITIAL_DELAY);
                         timer.start();
@@ -239,29 +236,43 @@ public class JChronograph  extends JPanel {
         /* CONFIGURE START/LAPSE BUTTON */
         final String BUTTON_CLICK_DELAY_MESSAGE_FORMAT =
                 _res_("BUTTON_CLICK_DELAY_MESSAGE_FORMAT");
-        startAction = new AbstractAction(_res_("START_ACTION_NAME")) {
+        startAction = new AbstractAction(
+                _res_("START_ACTION_NAME"),
+                new ImageIcon(getClass()
+                        .getClassLoader()
+                        .getResource("images/start.png")
+                        .getFile()))
+        {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //model.start(e.getWhen());
                 model.start(startAndLapse.getLastButtonPressEvent().getWhen());
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
-                        getName(), 
-                        (e.getWhen() 
+                        getName(),
+                        (e.getWhen()
                                 - startAndLapse.getLastButtonPressEvent().getWhen()));
             }
         };
         startAndLapse = new JButtonForChrono(startAction);
+        startAndLapse.setHorizontalTextPosition(JLabel.CENTER);
+        startAndLapse.setVerticalTextPosition(JLabel.BOTTOM);
         add(startAndLapse);
 
         /* LAPSE ACTION */
-        lapseAction = new AbstractAction(_res_("LAPSE_ACTION_NAME")) {
+        lapseAction = new AbstractAction(
+                _res_("LAPSE_ACTION_NAME"),
+                new ImageIcon(getClass()
+                        .getClassLoader()
+                        .getResource("images/lapse.png")
+                        .getFile()))
+        {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //model.lapse(e.getWhen());
                 model.lapse(startAndLapse.getLastButtonPressEvent().getWhen());
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
-                        getName(), 
-                        (e.getWhen() 
+                        getName(),
+                        (e.getWhen()
                                 - startAndLapse.getLastButtonPressEvent().getWhen()));
             }
         };
@@ -278,34 +289,47 @@ public class JChronograph  extends JPanel {
                 });
 
         /* CONFIGURE THE STOP BUTTON */
-        stop = new JButtonForChrono(new AbstractAction(_res_("STOP_ACTION_NAME")) {
+        stop = new JButtonForChrono(new AbstractAction(
+                _res_("STOP_ACTION_NAME"),
+                new ImageIcon(getClass()
+                        .getClassLoader()
+                        .getResource("images/stop.png")
+                        .getFile()))
+        {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //model.stop(e.getWhen());
                 model.stop(stop.getLastButtonPressEvent().getWhen());
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
-                        getName(), 
-                        (e.getWhen() 
+                        getName(),
+                        (e.getWhen()
                                 - stop.getLastButtonPressEvent().getWhen()));
             }
         });
-        String location = getClass().getClassLoader().getResource("images/stop.svg").getFile();
-        LOG.info("location: {}", location);
-        stop.setIcon(new ImageIcon(location));
+        stop.setHorizontalTextPosition(JLabel.CENTER);
+        stop.setVerticalTextPosition(JLabel.BOTTOM);
         add(stop);
 
         /* CONFIGURE THE RESET BUTTON */
-        reset = new JButtonForChrono(new AbstractAction(_res_("RESET_ACTION_NAME")) {
+        reset = new JButtonForChrono(new AbstractAction(
+                _res_("RESET_ACTION_NAME"),
+                new ImageIcon(getClass()
+                        .getClassLoader()
+                        .getResource("images/reset.png")
+                        .getFile())) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //model.reset(e.getWhen());
                 model.reset(reset.getLastButtonPressEvent().getWhen());
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
-                        getName(), 
-                        (e.getWhen() 
+                        getName(),
+                        (e.getWhen()
                                 - reset.getLastButtonPressEvent().getWhen()));
             }
         });
+        reset.setHorizontalTextPosition(JLabel.CENTER);
+        reset.setVerticalTextPosition(JLabel.BOTTOM);
+
         add(reset);
     }
 

@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static es.lcssl.chrono.gui.ChronographModel.format_timestamp;
-
+import java.util.ResourceBundle;
 /**
  * Class to manage a chronograph. The time is based on a {@code long}
  * milliseconds based method call.  It implements the {@link ChronographModel}
@@ -47,7 +47,13 @@ public class DefaultChronographModel implements ChronographModel {
     private static final Logger   log =
             LogManager.getLogger(DefaultChronographModel.class);
 
-    private static final String FORMAT = "{0}{1}{2}";
+    static final ResourceBundle   INTL =
+            ResourceBundle.getBundle(DefaultChronographModel.class.getName());
+
+    private static final String   FORMAT = "{0}{1}{2}";
+
+    private static final String   FORMAT_LOG =
+            INTL.getString("FORMAT_LOG");
 
     private long                  startTime,
                                   lapseTime,
@@ -93,8 +99,7 @@ public class DefaultChronographModel implements ChronographModel {
         long[] new_values = getIntervals(ts);
         pcs.firePropertyChange(RESET_ACTION,
                 old_values, new_values);
-        log.info("{}: {}: ts={}, OLD: Total={},"
-                + " Lapse={}; NEW: Total={}, Lapse={}",
+        log.info(FORMAT_LOG,
                 name, RESET_ACTION, ts,
                 format_timestamp(old_values[TOTAL_TIME], FORMAT),
                 format_timestamp(old_values[LAPSE_TIME], FORMAT),

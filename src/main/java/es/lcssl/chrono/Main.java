@@ -38,7 +38,7 @@ import java.util.ResourceBundle;
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class Main {
-    
+
     static final ResourceBundle INTL =
             ResourceBundle.getBundle(Main.class.getName());
 
