@@ -54,38 +54,149 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * This class implements a single chronograph with start/lapse and stop buttons
+ * This class implements a single chronograph with start/lapse, stop and
+ * reset buttons.
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 @SuppressWarnings("serial")
 public class JChronograph  extends JPanel {
 
+    /**
+     * Delay to be hold the automatic updater from starting to update
+     * continuously timestamps, to allow the user to properly read the
+     * total and lapse intervals.
+     */
     public static final int  DEFAULT_INITIAL_DELAY = 5000;
+
+    /**
+     * Inter update time (millisecs) to hold the updater between updates.
+     * The value used is something allowing a refresh time of 20 updates per
+     * second, but also prime with that value to avoid aliasing problems making
+     * some digits to synchronize with the screen refresh.
+     */
     public static final int  DEFAULT_DELAY         =   47;
 
+    /**
+     * {@link Logger} used for logging purposes.
+     */
     public static final Logger
                              LOG = LogManager.getLogger(JChronograph.class);
 
+    /**
+     * {@link ResourceBundle} instance to provide localized strings for user
+     * messages.
+     */
     private ResourceBundle   INTL;
 
-    private JLabel           total,
-                             lapse;
-    private JButtonForChrono startAndLapse,
-                             stop,
-                             reset;
+    /**
+     * {@link JLabel} to represent the total time interval.
+     */
+    private JLabel           total;
 
+    /**
+     * {@link JLabel} to represent the lapse time interval.
+     */
+    private JLabel           lapse;
+
+    /**
+     * {@link JButtonForChrono} button to allow the event processing to
+     * access the button press timestamp associated to the button click,
+     * instead of the button release that marks the action event.
+     *
+     * This button serves two functions, as start button and lapse button.
+     *
+     * When the button is configured as start button it holds the start
+     * {@link Action} instance; When configured as a lapse button (as it
+     * is started) it is configured with the lapse {@link Action}.
+     */
+    private JButtonForChrono startAndLapse;
+
+    /**
+     * {@link JButtonForChrono} button to generate stop events.
+     *
+     * @see #startAndLapse button.
+     */
+    private JButtonForChrono stop;
+
+    /**
+     * {@link JButtonForChrono} button to generate reset events.
+     *
+     * @see #startAndLapse button.
+     */
+    private JButtonForChrono reset;
+
+    /**
+     * {@link ChronographModel} model for this instance.
+     *
+     * Several {@link JChronograph}s can share the same model,
+     * generating events for it and receiving the updates from it.
+     */
     private final ChronographModel
                              model;
+    /**
+     * {@link Timer} instance to continuously update the chronograph while it
+     * runs.
+     *
+     * The timer instance restarts the timer with a different start time when
+     * some event produces intervals that must be read by the user.  But when
+     * the chronograph starts from a stopped state, the updates start
+     * immediately.
+     *
+     * @see #DEFAULT_INITIAL_DELAY
+     * @see #DEFAULT_DELAY
+     */
     private Timer            timer;
+
+    /**
+     * {@link TitledBorder} used to delimit the chronograph limits and to show
+     * the {@link ChronographModel} name in the top left corner.
+     *
+     * When a {@code null} name is used as the model name, the border is still
+     * drawn, but no title is shown then.
+     */
     private TitledBorder     title;
 
-    private transient Action startAction,
-                             lapseAction;
+    /**
+     * {@link Action} to be associated to the {@link #startAndLapse} button,
+     * when it acts as a start button.
+     *
+     * @see #initialize() method to see how these {@link Action}s are
+     * initialized.
+     */
+    private transient Action startAction;
 
+    /**
+     * {@link Action} to be associated to the {@link #startAndLapse} button,
+     * when it acts as a lapse button.
+     *
+     * @see #initialize() method to see how these {@link Action}s are
+     * initialized.
+     */
+    private transient Action lapseAction;
+
+    /**
+     * Default format to use in the {@link JChronograph} widget.
+     *
+     * The default format uses HTML tags to make the days, hours, mins, and secs
+     * bigger than the milliseconds excess time.
+     */
     private String           format =
             "<html><font size=+2>{0}{1}</font>{2}";
 
+    /**
+     * Complete constructor with model, layout manager and is double buffered
+     * parameters.
+     *
+     * @param model {@link ChronographModel} to use to hold the chronograph
+     * state.
+     *
+     * @param layout {@link LayoutManager} to be used for placing the internal
+     * widgets of the chronograph.
+     *
+     * @param isDoubleBuffered {@code boolean} value to use double buffered
+     * screen updates.
+     */
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
@@ -98,6 +209,16 @@ public class JChronograph  extends JPanel {
         /* don't put anything after initialize() */
     }
 
+    /**
+     * Convenience constructor using a {@link LayoutManager} and a
+     * {@link ChronographModel} only.
+     *
+     * The {@code isDoubleBuffered} property is assumed by default as
+     * configured in the superclass constructor.
+     *
+     * @param model {@link ChronographModel} to use initially.
+     * @param layout {@link LayoutManager} to use initially.
+     */
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
@@ -108,6 +229,15 @@ public class JChronograph  extends JPanel {
         initialize();
     }
 
+    /**
+     * Convenience constructor using only the {@link #model} and
+     * the {@code isDoubleBuffered} properties.
+     *
+     * @param model {@link ChronographModel} to be used as state data holder.
+     *
+     * @param isDoubleBuffered {@code boolean} value indicating to do double
+     * buffering of contents to the screen.
+     */
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model,
@@ -118,6 +248,12 @@ public class JChronograph  extends JPanel {
         initialize();
     }
 
+    /**
+     * Simple convenience constructor using only the {@code model} reference.
+     *
+     * @param model reference to the {@link ChronographModel} instance to use
+     * as state data.
+     */
     @SuppressWarnings("this-escape")
     public JChronograph(
             ChronographModel model)
@@ -126,16 +262,36 @@ public class JChronograph  extends JPanel {
         initialize();
     }
 
+    /**
+     * Default, parameter less constructor.
+     *
+     * A simple default model is created for the instance and the normal
+     * initialization routines are called.
+     */
     @SuppressWarnings("this-escape")
     public JChronograph() {
         this.model = new DefaultChronographModel();
         initialize();
     }
 
+    /**
+     * Auxiliary method to get a {@link String} value from a {@link String}
+     * property name from a locale based {@code .properties} file.
+     *
+     * @param name {@link String} parameter name to be searched.
+     * @return the {@link String} parameter value from the {@code .properties}
+     * file.
+     */
     private String _res_(String name) {
         return INTL.getString(name);
     }
 
+    /**
+     * Initialization routine.
+     *
+     * Common routine to initialize all the instance fields in every
+     * constructor.
+     */
     private void initialize() {
 
         INTL = ResourceBundle.getBundle(getClass().getName());
@@ -250,7 +406,8 @@ public class JChronograph  extends JPanel {
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
                         getName(),
                         (e.getWhen()
-                                - startAndLapse.getLastButtonPressEvent().getWhen()));
+                                - startAndLapse.getLastButtonPressEvent()
+                                        .getWhen()));
             }
         };
         startAndLapse = new JButtonForChrono(startAction);
@@ -272,7 +429,8 @@ public class JChronograph  extends JPanel {
                 LOG.debug(BUTTON_CLICK_DELAY_MESSAGE_FORMAT,
                         getName(),
                         (e.getWhen()
-                                - startAndLapse.getLastButtonPressEvent().getWhen()));
+                                - startAndLapse.getLastButtonPressEvent()
+                                        .getWhen()));
             }
         };
 
@@ -330,29 +488,74 @@ public class JChronograph  extends JPanel {
         add(reset);
     }
 
+    /**
+     * Update the interval values passed in the {@code values} parameter to
+     * both {@link JLabel} instances for total and lapse times.
+     *
+     * @param values a {@code long[]} array of two interval values
+     * (measured in milliseconds) to represent total and lapse times.
+     */
     private void update(long[] values) {
         total.setText(format_timestamp(values[TOTAL_TIME], format));
         lapse.setText(format_timestamp(values[LAPSE_TIME], format));
     }
 
+    /**
+     * Getter for the {@code model} parameter.
+     *
+     * @return a {@link ChronographModel} representing the model used by this
+     * instance.
+     */
     public ChronographModel getModel() {
         return model;
     }
 
+    /**
+     * Getter for the name attribute.  The name used by this instance is the
+     * same as the model name, so the widget name is overriden by the name of
+     * the model set as widget model.
+     *
+     * @return a {@link String} name from the model.
+     */
     @Override
     public String getName() {
         return model.getName();
     }
 
+    /**
+     * Setter for the name attribute.  The name used by this instance is the one
+     * used by the model meaning that when we change the name we are also changing
+     * the model's name (which is bound, so modifying one changes the other)
+     *
+     * This property is bound in the model, so this instance is tied to the model
+     * on changes for this property.
+     *
+     * @param new_name is the {@link String} new name to be used in the model.
+     */
     @Override
     public void setName(String new_name) {
         model.setName(new_name);
     }
 
+    /**
+     * Getter for the format to be used in the times shown in the labels.
+     *
+     * Both labels use the same format, so they cannot be given different
+     * formatting.
+     *
+     * @return the {@link String} representing the format used to display
+     * the intervals.
+     */
     public String getFormat() {
         return format;
     }
 
+    /**
+     * Setter for the format to use in displaying the intervals of the total
+     * and lapse times.
+     *
+     * @param format is the {@link String} value for the new format to use.
+     */
     public void setFormat(String format) {
         this.format = format;
     }

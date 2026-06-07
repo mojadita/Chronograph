@@ -7,9 +7,9 @@
    viewBox="0 0 512 512"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
    sodipodi:docname="icons.svg"
-   inkscape:export-filename="../resources/images/lapse.png"
+   inkscape:export-filename="../resources/images/stop.png"
    inkscape:export-xdpi="6"
    inkscape:export-ydpi="6"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -29,14 +29,14 @@
      showguides="true"
      showgrid="false"
      inkscape:zoom="1.4142136"
-     inkscape:cx="251.73001"
-     inkscape:cy="292.7422"
+     inkscape:cx="234.75945"
+     inkscape:cy="257.03331"
      inkscape:window-width="1810"
      inkscape:window-height="949"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-x="56"
+     inkscape:window-y="46"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer3">
+     inkscape:current-layer="layer1">
     <sodipodi:guide
        position="255.97265,262.4797"
        orientation="1,0"
@@ -88,8 +88,7 @@
      inkscape:label="stop"
      inkscape:groupmode="layer"
      id="layer1"
-     style="display:none"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <path
        sodipodi:type="star"
        id="path2"
@@ -110,40 +109,51 @@
        inkscape:export-filename="path2.png"
        inkscape:export-xdpi="6.7454076"
        inkscape:export-ydpi="6.7454076"
-       sodipodi:insensitive="true" />
+       inkscape:label="octogono" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;line-height:1.25;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
-       x="88.959976"
-       y="299.32001"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;line-height:1.25;font-family:'OCR-A BT';-inkscape-font-specification:'OCR-A BT, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
+       x="74.671448"
+       y="297.35751"
        id="text2"
        inkscape:transform-center-x="-0.5000039"
        inkscape:transform-center-y="-1.1553449e-05"
-       sodipodi:insensitive="true"><tspan
+       inkscape:label="stop"><tspan
          sodipodi:role="line"
          id="tspan2"
-         x="88.959976"
-         y="299.32001"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">STOP</tspan><tspan
-         sodipodi:role="line"
-         x="88.959976"
-         y="449.32001"
-         id="tspan3"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25" /></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;line-height:1.25;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:none;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
-       x="92.44001"
-       y="299.26004"
-       id="text5"
-       inkscape:transform-center-x="-0.5000039"
-       inkscape:transform-center-y="-1.1553449e-05"
-       sodipodi:insensitive="true"><tspan
+         x="0"
+         y="0"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;font-family:'OCR-A BT';-inkscape-font-specification:'OCR-A BT, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">STOP</tspan><tspan
          sodipodi:role="line"
          x="0"
          y="0"
+         id="tspan3"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;font-family:'OCR-A BT';-inkscape-font-specification:'OCR-A BT, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;line-height:1.25;font-family:'OCR-A BT';-inkscape-font-specification:'OCR-A BT, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;display:none;fill:#ffffff;stroke:#ffffff;stroke-width:2.25"
+       x="74.671448"
+       y="297.35751"
+       id="text5"
+       inkscape:transform-center-x="-0.5000039"
+       inkscape:transform-center-y="-1.1553449e-05"
+       inkscape:label="pare"><tspan
+         sodipodi:role="line"
+         x="74.671448"
+         y="297.35751"
          id="tspan5"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">PARE</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;font-family:'OCR-A BT';-inkscape-font-specification:'OCR-A BT, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke:#ffffff;stroke-width:2.25">PARE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:146.667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;display:none;fill:#ffffff;stroke:none;stroke-width:6.871;stroke-linejoin:bevel;stroke-dasharray:none"
+       x="56.266464"
+       y="308.52942"
+       id="text6"
+       inkscape:label="СТОП"><tspan
+         sodipodi:role="line"
+         id="tspan6"
+         x="56.266464"
+         y="308.52942">СТОП</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
@@ -153,7 +163,7 @@
      sodipodi:insensitive="true">
     <path
        sodipodi:type="star"
-       style="fill:#ffff00;fill-opacity:1;stroke:#000000;stroke-width:10;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:#ffff00;fill-opacity:1;stroke:#000000;stroke-width:10;stroke-dasharray:none;stroke-opacity:1"
        id="path4"
        inkscape:flatsided="false"
        sodipodi:sides="5"
@@ -225,7 +235,8 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="lapse"
-     style="display:inline">
+     style="display:none"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#0000ff;stroke:#ffffff;stroke-width:11.5238;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        id="rect1"
@@ -239,13 +250,13 @@
        inkscape:export-ydpi="6.741827" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:400px;font-family:'Century Schoolbook L';-inkscape-font-specification:'Century Schoolbook L, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:1.2"
-       x="120.59999"
-       y="400.40002"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:466.667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:1.2"
+       x="130.56046"
+       y="410.49231"
        id="text1"><tspan
          sodipodi:role="line"
          id="tspan1"
-         x="120.59999"
-         y="400.40002">P</tspan></text>
+         x="130.56046"
+         y="410.49231">P</tspan></text>
   </g>
 </svg>

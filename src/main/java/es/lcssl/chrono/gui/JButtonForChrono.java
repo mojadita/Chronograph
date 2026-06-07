@@ -16,34 +16,67 @@ import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+/**
+ * Small derived class from {@link JButton} to register the {@link MouseEvent}
+ * of the button press prior to a click event (this event has the timestamp
+ * required to be used in the chronograph, and not the one used in the button
+ * click, which represents the timestamp at the button release)
+ *
+ * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
+ */
 @SuppressWarnings("serial")
 public class JButtonForChrono extends JButton {
 
-        MouseEvent lastButtonPressEvent;
+    /**
+     * Saved event of the last button press event.
+     */
+    MouseEvent lastButtonPressEvent;
 
-        @SuppressWarnings("this-escape")
-        public JButtonForChrono(Action action) {
-            super(action);
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent evt) {
-                    lastButtonPressEvent = evt;
-                }
-            });
-        }
+    /**
+     * In use constructor to use the parent class constructor, and to
+     * register a {@link MouseAdapter} to listen for mouse events.
+     *
+     * Every time a mouse button press event is detected, it is saved for
+     * later processing when the button {@link #actionListener} is to be
+     * called, to have access to the last button press event and be able to
+     * provide events using the button press timestamp, instead of the
+     * button release (which is the timestamp that normally appears in the
+     * mouse event passed)
+     *
+     * @param action Action instance to represent the button action to perform
+     * when a button click is generated.
+     */
+    @SuppressWarnings("this-escape")
+    public JButtonForChrono(Action action) {
+        super(action);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent evt) {
+                lastButtonPressEvent = evt;
+            }
+        });
+    }
 
+    /**
+     * Getter for the {@link #lastButtonPressEvent} property.
+     *
+     * @return the {@link MouseEvent} saved for later processing.
+     */
     public MouseEvent getLastButtonPressEvent() {
         return lastButtonPressEvent;
     }
 
     /**
-     * This main routine is left to allow to test the JButtonForChrono,
-     * creating a single window with an instance of this class, to compute
-     * the difference between the button activation timestamp and the
+     * main() routine for testing purposes.
+     *
+     * This main routine is left here to allow to test the
+     * {@link JButtonForChrono},
+     * creating a single window {@link JFrame} with an instance of this class,
+     * to compute the difference between the button activation timestamp and the
      * previous button press mouse event.  This should be equal to the
      * interval between the button press and button release of the mouse.
      *
-     * @param args  not used.
+     * @param args not used.
      */
     public static void main(String[] args) {
         JFrame frame  = new JFrame("Prueba de JButtonForChrono");

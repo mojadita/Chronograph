@@ -31,18 +31,39 @@ import javax.swing.JFrame;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import es.lcssl.chrono.gui.JChronograph;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Main class to hold a main() method to execute this as an independent program.
+ *
+ * This class stays out from the {@link es.lcssl.chrono.gui} package, as it
+ * will be evicted in the future making the Chronograph stuff a library module,
+ * instead of an application.
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class Main {
+    
+    /**
+     * private constructor so no instance of this class can be created.
+     */
+    private Main() {}
 
+    /**
+     * {@link ResourceBundle} instance to hold localization resources.
+     */
     static final ResourceBundle INTL =
             ResourceBundle.getBundle(Main.class.getName());
 
 
+    /**
+     * Simple main method to display as many {@link JChronograph}s as needed to
+     * satisfy the list of names passed through the {@code args} parameter list.
+     *
+     * @param args are the names of the {@link JChronograph}s that will be
+     * created to show on the screen.
+     */
     public static final void main(String[] args) {
         if (args.length == 0) {
             System.err.println(
