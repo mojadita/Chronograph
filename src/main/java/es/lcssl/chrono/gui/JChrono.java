@@ -43,17 +43,14 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
-import java.util.Random;
-
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.plaf.basic.BasicBorders.ButtonBorder;
-import javax.swing.plaf.metal.MetalBorders.InternalFrameBorder;
-import static java.awt.RenderingHints.*;
+import javax.swing.Timer;
 import static java.lang.Math.*;
 import static java.text.MessageFormat.format;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import java.awt.geom.Ellipse2D;
 
 /**
  *
@@ -61,13 +58,23 @@ import static java.text.MessageFormat.format;
  */
 public class JChrono extends JComponent {
 
-    Font majorNumbersFont = new Font("Courier New", Font.BOLD,           26);
-    Font minorNumbersFont = new Font("Courier New", Font.ROMAN_BASELINE, 16);
-    Font secsNumbersFont  = new Font("Courier New", Font.BOLD,           20);
+    Font majorNumbersFont = new Font("Courier", Font.BOLD,             26);
+    Font minorNumbersFont = new Font("Courier", Font.ITALIC,           16);
+    Font secsNumbersFont  = new Font("Courier", Font.ROMAN_BASELINE,   20);
     double Tick200ms = 0.98,
            Tick1s    = 0.96,
            Tick5s    = 0.94,
-           Tick10s   = 0.92;
+           Tick10s   = 0.92,
+           posSecs   = 0.85,
+           posHour   = 0.65;
+    
+    Timer timer = new Timer(53,
+            e -> { invalidate(); repaint(); } );
+    
+    public JChrono() {
+        timer.setCoalesce(true);
+        timer.start();
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -81,21 +88,21 @@ public class JChrono extends JComponent {
         Insets insets = getInsets();
         int width = getWidth(), height = getHeight();
 
-        width -= insets.left + insets.right;
-        height -= insets.top + insets.bottom;
+        width  -= insets.left + insets.right;
+        height -= insets.top  + insets.bottom;
         if (isOpaque()) {
             g2d.clearRect( insets.left, insets.top, width, height);
         }
 
-        double dimension = Math.min(width, height)/2.0;
+        double radius = Math.min(width, height)/2.0;
         AffineTransform map = g2d.getTransform();
         g2d.translate(insets.left + width/2, insets.top + height/2);
 
         /* Draw the ticks */
         for (int i = 0; i < 300; ++i) {
             double angle  = i * PI / 150.0;
-            double x0     =  dimension * sin(angle),
-                   y0     = -dimension * cos(angle);
+            double x0     =  radius * sin(angle),
+                   y0     = -radius * cos(angle);
             double factor = (i % 50 == 0
                     ? Tick10s
                     : (i % 25 == 0
@@ -112,7 +119,6 @@ public class JChrono extends JComponent {
 
             if (i % 25 == 0) {
                 /* draw the mod 5s number */
-                double pos_secs = 0.85;
                 double x_center = x0, y_center = y0;
 
                 g2d.setFont(secsNumbersFont);
@@ -125,18 +131,17 @@ public class JChrono extends JComponent {
                 Rectangle2D bounds = tl.getBounds();
                 g2d.drawString(
                         text,
-                        (float)(pos_secs * x_center - bounds.getCenterX()),
-                        (float)(pos_secs * y_center - bounds.getCenterY()));
+                        (float)(posSecs * x_center - bounds.getCenterX()),
+                        (float)(posSecs * y_center - bounds.getCenterY()));
 
             }
 
         }
         for (int h = 0; h < 24; ++h) {
             double angle = h * PI / 12;
-            double x0 =  dimension * sin( angle ),
-                   y0 = -dimension * cos( angle );
+            double x0 =  radius * sin( angle ),
+                   y0 = -radius * cos( angle );
             double x_center = x0, y_center = y0;
-            double pos_hour = 0.65;
             String text = format( "{0}", h );
             Font which_font = (h % 3 == 0
                     ? majorNumbersFont
@@ -147,9 +152,33 @@ public class JChrono extends JComponent {
                     .getBounds();
             g2d.drawString(
                     text,
-                    (float) (pos_hour * x_center - bounds.getCenterX()),
-                    (float) (pos_hour * y_center - bounds.getCenterY()) );
+                    (float) (posHour * x_center - bounds.getCenterX()),
+                    (float) (posHour * y_center - bounds.getCenterY()) );
         }
+
+        /* lets paint the hands */
+        long timestamp = System.currentTimeMillis();
+        double hours_angle  = (timestamp % 86_400_000L) * PI / 43.2E6,
+                mins_angle  = (timestamp %  3_600_000L) * PI /  1.8E6,
+                secs_angle  = (timestamp %     60_000L) * PI / 30.0E3;
+        double[] angles     = {hours_angle, mins_angle, secs_angle};
+        double[] radii      = {0.50, 0.80, 0.90};
+        double[] radii_tail = { -0.05, -0.1, -0.15 };
+        
+        for (int i = 0; i < angles.length; ++i) {
+            double x0  =  radius * sin(angles[i]),
+                   y0  = -radius * cos(angles[i]),
+                   x1  = x0 * radii[i],
+                   y1  = y0 * radii[i],
+                   x2  = x0 * radii_tail[i],
+                   y2  = y0 * radii_tail[i];
+            Shape hand = new Line2D.Double(x2, y2, x1, y1);
+            g2d.draw(hand);
+        }
+        Shape small_circle = new Ellipse2D.Double(
+                -radius * 0.01, -radius * 0.01,
+                2*radius * 0.01, 2*radius*0.01);
+        g2d.fill(small_circle);
 
         g2d.setTransform( map );
     }
@@ -160,13 +189,12 @@ public class JChrono extends JComponent {
         for (Font f : fonts) {
             System.out.println( f.getName() );
         }
-        Random rnd = new Random();
         EventQueue.invokeLater( () -> {
             JFrame frame = new JFrame( "Example" );
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.setLayout(new BorderLayout(10, 10));
             JChrono crono = new JChrono();
-            crono.setBorder( new SoftBevelBorder(SoftBevelBorder.RAISED));
+            crono.setBorder( new TitledBorder(new LineBorder(Color.blue), "Hola como estas?"));
             crono.setPreferredSize( new Dimension(500, 500));
             contentPane.add(crono, BorderLayout.CENTER);
             contentPane.add(
