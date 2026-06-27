@@ -44,7 +44,7 @@ import java.util.ResourceBundle;
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class Main {
-    
+
     /**
      * private constructor so no instance of this class can be created.
      */

@@ -25,6 +25,7 @@
  */
 package es.lcssl.chrono.gui;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -35,6 +36,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
@@ -51,6 +53,8 @@ import static java.text.MessageFormat.format;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import java.awt.geom.Ellipse2D;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -58,19 +62,19 @@ import java.awt.geom.Ellipse2D;
  */
 public class JChrono extends JComponent {
 
-    Font majorNumbersFont = new Font("Courier", Font.BOLD,             26);
-    Font minorNumbersFont = new Font("Courier", Font.ITALIC,           16);
-    Font secsNumbersFont  = new Font("Courier", Font.ROMAN_BASELINE,   20);
+    Font majorNumbersFont = new Font("Sitka Text", Font.BOLD,             26);
+    Font minorNumbersFont = new Font("Sitka Text", Font.ITALIC,           16);
+    Font secsNumbersFont  = new Font("Sitka Text", Font.ROMAN_BASELINE,   20);
     double Tick200ms = 0.98,
            Tick1s    = 0.96,
            Tick5s    = 0.94,
            Tick10s   = 0.92,
            posSecs   = 0.85,
            posHour   = 0.65;
-    
-    Timer timer = new Timer(53,
+
+    Timer timer = new Timer(47,
             e -> { invalidate(); repaint(); } );
-    
+
     public JChrono() {
         timer.setCoalesce(true);
         timer.start();
@@ -158,13 +162,20 @@ public class JChrono extends JComponent {
 
         /* lets paint the hands */
         long timestamp = System.currentTimeMillis();
+        timestamp -= new Date(timestamp).getTimezoneOffset() * 60_000; // time offset at the time.
         double hours_angle  = (timestamp % 86_400_000L) * PI / 43.2E6,
                 mins_angle  = (timestamp %  3_600_000L) * PI /  1.8E6,
                 secs_angle  = (timestamp %     60_000L) * PI / 30.0E3;
         double[] angles     = {hours_angle, mins_angle, secs_angle};
         double[] radii      = {0.50, 0.80, 0.90};
         double[] radii_tail = { -0.05, -0.1, -0.15 };
-        
+        BasicStroke[] strokes    = {
+            new BasicStroke(10,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL),
+            new BasicStroke(4, BasicStroke.CAP_SQUARE,BasicStroke.JOIN_BEVEL),
+            new BasicStroke(1, BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL)
+        };
+
+        Stroke saved = g2d.getStroke();
         for (int i = 0; i < angles.length; ++i) {
             double x0  =  radius * sin(angles[i]),
                    y0  = -radius * cos(angles[i]),
@@ -173,8 +184,10 @@ public class JChrono extends JComponent {
                    x2  = x0 * radii_tail[i],
                    y2  = y0 * radii_tail[i];
             Shape hand = new Line2D.Double(x2, y2, x1, y1);
+            g2d.setStroke( strokes[i]);
             g2d.draw(hand);
         }
+        g2d.setStroke( saved );
         Shape small_circle = new Ellipse2D.Double(
                 -radius * 0.01, -radius * 0.01,
                 2*radius * 0.01, 2*radius*0.01);

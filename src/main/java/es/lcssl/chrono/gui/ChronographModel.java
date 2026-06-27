@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 /**
  * This is the ChronographModel interface.
- * 
+ *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public interface ChronographModel {
@@ -40,7 +40,7 @@ public interface ChronographModel {
     /**
      * Index element to hold the total time in arrays returned by
      * {@link #getIntervals(long) }.
-     * 
+     *
      * @see #getIntervals(long)
      */
     static final int TOTAL_TIME = 0;
@@ -138,7 +138,7 @@ public interface ChronographModel {
      * Getter for the {@code running} property.  This property is bound, meaning
      * that any change on it will trigger the delivery of
      * {@link PropertyChangeEvent}s to the listeners of this property.
-     * 
+     *
      * @return a {@code boolean} result indicating if the
      * {@link ChronographModel} is running.
      */
@@ -147,10 +147,10 @@ public interface ChronographModel {
     /**
      * Getter for the current values of the timestamps for Total and Lapse
      * intervals.
-     * 
+     *
      * @param ts is the current timestamp at which the intervals are to be
      * measured.
-     * 
+     *
      * @return a pair of {@code long}s in a {@code long[]} array of two values.
      * The corresponding values of the values is {@link #TOTAL_TIME} for the
      * total time measured and {@link #LAPSE_TIME} for the lapse time.
@@ -160,7 +160,7 @@ public interface ChronographModel {
     /**
      * This method asks the {@link ChronographModel} to get a timestamp from the
      * internal timestamp {@link Supplier}{@code <}{@link Long}{@code >}.
-     * 
+     *
      * @return a {@code long} value indicating the current timestamp.
      */
     long getTimestamp();
@@ -175,7 +175,7 @@ public interface ChronographModel {
      * Setter for {@code name} property.  This property should be bound,
      * meaning that a {@link PropertyChangeEvent} is fired when this
      * property changes.
-     * 
+     *
      * @param new_name is the {@link String} new name to set the model.
      */
     void setName(String new_name);
@@ -184,10 +184,10 @@ public interface ChronographModel {
      * Property change events registry function.  It registers a
      * {@link PropertyChangeListener} to be notified when a property change
      * is detected.
-     * 
+     *
      * @param property_name  the name of the property involved in the change or
      * the action that triggered it.
-     * 
+     *
      * @param listener the {@link PropertyChangeListener} reference of the
      * listener to be notified when the event required is triggered.
      */
@@ -198,7 +198,7 @@ public interface ChronographModel {
      * Unregisters a {@link PropertyChangeListener}.
      * @param property_name is the {@link String} property name which is to be
      * used to unregister.
-     * 
+     *
      * @param listener the {@link PropertyChangeListener} to be unregistered.
      */
     void removePropertyChangeListener(
@@ -207,10 +207,10 @@ public interface ChronographModel {
     /**
      * Convenience function to format timestamps in a way that is convenient to
      * use them in the different modules that will use it.
-     * 
+     *
      * @param interval  The time interval to be formatted (the time duration
      * given in milliseconds)
-     * 
+     *
      * @param format The formatting string.  This {@link String} needs to have
      * three parameter substitutions ({@code {0}}), {@code {1}}) and {@code {2}})
      * to format the number of days (optional, appears as {@code ""} if no
