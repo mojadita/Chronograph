@@ -26,48 +26,70 @@
 package es.lcssl.chrono.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import static java.awt.RenderingHints.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
+import java.util.Random;
+
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.plaf.basic.BasicBorders.ButtonBorder;
+import javax.swing.plaf.metal.MetalBorders.InternalFrameBorder;
+import static java.awt.RenderingHints.*;
 import static java.lang.Math.*;
 import static java.text.MessageFormat.format;
-import java.util.Random;
 
 /**
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
 public class JChrono extends JComponent {
-    
-    Font majorNumbersFont = new Font("Century Schoolbook L Bold", Font.BOLD, 32);
-    Font minorNumbersFont = new Font("Century Schoolbook L Italic", Font.ITALIC, 24);
-    Font secsNumbersFont = new Font("CMU Typewriter Text", Font.BOLD, 14);
-    double halfTick = 0.003;
-    double secTick  = 0.006;
-    double hourTick = 0.009;
+
+    Font majorNumbersFont = new Font("Courier New", Font.BOLD,           26);
+    Font minorNumbersFont = new Font("Courier New", Font.ROMAN_BASELINE, 16);
+    Font secsNumbersFont  = new Font("Courier New", Font.BOLD,           20);
+    double Tick200ms = 0.98,
+           Tick1s    = 0.96,
+           Tick5s    = 0.94,
+           Tick10s   = 0.92;
 
     @Override
     protected void paintComponent(Graphics g) {
-        
+
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(
                 KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        
-        double dimension = Math.min(getWidth(), getHeight())/2.0;
-        g2d.translate(getWidth()/2, getHeight()/2);
+
+        Insets insets = getInsets();
+        int width = getWidth(), height = getHeight();
+
+        width -= insets.left + insets.right;
+        height -= insets.top + insets.bottom;
+        if (isOpaque()) {
+            g2d.clearRect( insets.left, insets.top, width, height);
+        }
+
+        double dimension = Math.min(width, height)/2.0;
+        AffineTransform map = g2d.getTransform();
+        g2d.translate(insets.left + width/2, insets.top + height/2);
 
         /* Draw the ticks */
         for (int i = 0; i < 300; ++i) {
@@ -75,80 +97,86 @@ public class JChrono extends JComponent {
             double x0     =  dimension * sin(angle),
                    y0     = -dimension * cos(angle);
             double factor = (i % 50 == 0
-                    ? 0.92
+                    ? Tick10s
                     : (i % 25 == 0
-                        ? 0.94
+                        ? Tick5s
                         : (i % 5 == 0
-                            ? 0.96
-                            : 0.98)));
-            double x1     = x0*factor,
-                   y1     = y0*factor;
-            
+                            ? Tick1s
+                            : Tick200ms)));
+            double x1     = x0 * factor,
+                   y1     = y0 * factor;
+
             Shape line = new Line2D.Double(x0, y0, x1, y1);
+
             g2d.draw(line);
-            
+
             if (i % 25 == 0) {
-                /* draw the number */
-                double pos_hour = 0.70;
+                /* draw the mod 5s number */
                 double pos_secs = 0.85;
                 double x_center = x0, y_center = y0;
-                
-                String text = format("{0}", (i / 25 + 11) % 12 + 1);
-                Font which_font = (i % 75 == 0 
-                        ? majorNumbersFont
-                        : minorNumbersFont);
-                g2d.setFont(which_font);
+
+                g2d.setFont(secsNumbersFont);
+                String text = format("{0}", i/5);
                 FontRenderContext frc = g2d.getFontRenderContext();
                 TextLayout tl = new TextLayout(
-                        text, 
-                        which_font,
+                        text,
+                        secsNumbersFont,
                         frc);
                 Rectangle2D bounds = tl.getBounds();
                 g2d.drawString(
                         text,
-                        (float) (pos_hour * x_center - bounds.getCenterX()),
-                        (float) (pos_hour * y_center - bounds.getCenterY()));
-                g2d.setFont(secsNumbersFont);
-                text = format("{0}", i/5);
-                frc = g2d.getFontRenderContext();
-                tl = new TextLayout(
-                        text,
-                        secsNumbersFont,
-                        frc);
-                bounds = tl.getBounds();
-                g2d.drawString(
-                        text, 
                         (float)(pos_secs * x_center - bounds.getCenterX()),
                         (float)(pos_secs * y_center - bounds.getCenterY()));
-                
+
             }
-            
-        }        
-        
+
+        }
+        for (int h = 0; h < 24; ++h) {
+            double angle = h * PI / 12;
+            double x0 =  dimension * sin( angle ),
+                   y0 = -dimension * cos( angle );
+            double x_center = x0, y_center = y0;
+            double pos_hour = 0.65;
+            String text = format( "{0}", h );
+            Font which_font = (h % 3 == 0
+                    ? majorNumbersFont
+                    : minorNumbersFont);
+            g2d.setFont( which_font );
+            Rectangle2D bounds = new TextLayout(
+                    text, which_font, g2d.getFontRenderContext())
+                    .getBounds();
+            g2d.drawString(
+                    text,
+                    (float) (pos_hour * x_center - bounds.getCenterX()),
+                    (float) (pos_hour * y_center - bounds.getCenterY()) );
+        }
+
+        g2d.setTransform( map );
     }
-    
+
     public static void main(String[] args) {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Font[] fonts = ge.getAllFonts();
-        for (Font f: fonts) {
-            System.out.println(f.getName());
+        for (Font f : fonts) {
+            System.out.println( f.getName() );
         }
         Random rnd = new Random();
-        EventQueue.invokeLater(() -> {
-            JFrame frame = new JFrame("Example");
+        EventQueue.invokeLater( () -> {
+            JFrame frame = new JFrame( "Example" );
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.setLayout(new BorderLayout(10, 10));
             JChrono crono = new JChrono();
-            //crono.majorNumbersFont = fonts[rnd.nextInt(fonts.length)];
-            //crono.minorNumbersFont = fonts[rnd.nextInt(fonts.length)];
-            contentPane.add(new JChrono(), BorderLayout.CENTER);
+            crono.setBorder( new SoftBevelBorder(SoftBevelBorder.RAISED));
+            crono.setPreferredSize( new Dimension(500, 500));
+            contentPane.add(crono, BorderLayout.CENTER);
             contentPane.add(
                     new JLabel("Se está quemando la serreríaaa!!!",JLabel.CENTER),
                     BorderLayout.SOUTH);
-            frame.setSize(640, 480);
+            frame.pack();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
         });
+
     }
-    
+
 }

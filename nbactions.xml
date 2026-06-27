@@ -52,4 +52,11 @@
                 <exec.appArgs>Mazinger_Z</exec.appArgs>
             </properties>
         </action>
+        <action>
+            <actionName>CUSTOM-Generate javadoc jar</actionName>
+            <displayName>Generate javadoc jar</displayName>
+            <goals>
+                <goal>javadoc:jar</goal>
+            </goals>
+        </action>
     </actions>
