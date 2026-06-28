@@ -62,9 +62,20 @@ import java.util.Date;
  */
 public class JChrono extends JComponent {
 
-    Font majorNumbersFont = new Font("Sitka Text", Font.BOLD,             26);
-    Font minorNumbersFont = new Font("Sitka Text", Font.ITALIC,           16);
-    Font secsNumbersFont  = new Font("Sitka Text", Font.ROMAN_BASELINE,   20);
+    Font majorNumbersFont = new Font("Serif", Font.BOLD,             26);
+    Font minorNumbersFont = new Font("Serif", Font.ITALIC,           16);
+    Font secsNumbersFont  = new Font("Serif", Font.ROMAN_BASELINE,   20);
+    String[] hours = {
+        "0", "1", "2", "3", "4", "5",
+        "6", "7", "8", "9", "10", 
+        "11", "12", "13", "14", "15",
+        "16", "17", "18", "19", "20",
+        "21", "22", "23",
+    };
+    String[] mins = {
+        "0", "5", "10", "15", "20", "25",
+        "30", "35", "40", "45", "50", "55",
+    };
     double Tick200ms = 0.98,
            Tick1s    = 0.96,
            Tick5s    = 0.94,
@@ -126,7 +137,7 @@ public class JChrono extends JComponent {
                 double x_center = x0, y_center = y0;
 
                 g2d.setFont(secsNumbersFont);
-                String text = format("{0}", i/5);
+                String text = mins[i/25];
                 FontRenderContext frc = g2d.getFontRenderContext();
                 TextLayout tl = new TextLayout(
                         text,
@@ -146,7 +157,7 @@ public class JChrono extends JComponent {
             double x0 =  radius * sin( angle ),
                    y0 = -radius * cos( angle );
             double x_center = x0, y_center = y0;
-            String text = format( "{0}", h );
+            String text = hours[h];
             Font which_font = (h % 3 == 0
                     ? majorNumbersFont
                     : minorNumbersFont);
@@ -171,8 +182,8 @@ public class JChrono extends JComponent {
         double[] radii_tail = { -0.05, -0.1, -0.15 };
         BasicStroke[] strokes    = {
             new BasicStroke(10,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL),
-            new BasicStroke(4, BasicStroke.CAP_SQUARE,BasicStroke.JOIN_BEVEL),
-            new BasicStroke(1, BasicStroke.CAP_BUTT,BasicStroke.JOIN_BEVEL)
+            new BasicStroke(4, BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL),
+            new BasicStroke(1, BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL)
         };
 
         Stroke saved = g2d.getStroke();
@@ -189,8 +200,8 @@ public class JChrono extends JComponent {
         }
         g2d.setStroke( saved );
         Shape small_circle = new Ellipse2D.Double(
-                -radius * 0.01, -radius * 0.01,
-                2*radius * 0.01, 2*radius*0.01);
+                -radius * 0.03, -radius * 0.03,
+                2*radius * 0.03, 2*radius*0.03);
         g2d.fill(small_circle);
 
         g2d.setTransform( map );
