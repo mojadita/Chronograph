@@ -36,7 +36,6 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -49,6 +48,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.util.Date;
 import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.CAP_SQUARE;
@@ -56,8 +56,6 @@ import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.lang.Math.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import java.awt.font.GlyphVector;
-import java.awt.geom.Rectangle2D;
 
 /**
  *
@@ -65,9 +63,9 @@ import java.awt.geom.Rectangle2D;
  */
 public class JChrono extends JComponent {
 
-    Font majorHoursFont = new Font("URW Bookman L", Font.BOLD,             24);
-    Font minorHoursFont = new Font("URW Bookman L", Font.ITALIC,           18);
-    Font minutesFont    = new Font("URW Bookman L", Font.ROMAN_BASELINE,   22);
+    Font majorHoursFont = new Font("Bahnschrift", Font.BOLD,             30);
+    Font minorHoursFont = new Font("Bahnschrift", Font.ITALIC,           18);
+    Font minutesFont    = new Font("Bahnschrift", Font.ROMAN_BASELINE,   22);
     
     String[] hourNames = {
         "0", "1", "2", "3", "4", "5",
@@ -102,7 +100,7 @@ public class JChrono extends JComponent {
             secTail         = -0.150,
             hourHead        =  0.500,
             minHead         =  0.800,
-            secHead         =  0.850,
+            secHead         =  0.940,
             hourHandWidth   =  0.030,
             minHandWidth    =  0.020,
             secHandWidth    =  0.008;
@@ -117,7 +115,8 @@ public class JChrono extends JComponent {
             lbl1hMinorColor = getForeground(),
             hourHandColor   = getForeground(),
             minuteHandColor = getForeground(),
-            secondHandColor = getForeground();
+            secondHandColor = getForeground(),
+            smallCircleColor= getForeground();
             
     
     public static final int
@@ -212,7 +211,6 @@ public class JChrono extends JComponent {
                     (float) (width * radius), cap, JOIN_BEVEL ) );
             g.setColor(color);
             g.draw( transf.createTransformedShape( ticks ) );
-            g.setColor(getForeground());
     }
     
     private void drawHand(
@@ -266,9 +264,7 @@ public class JChrono extends JComponent {
                 radius, tick10sWidth, tick10sColor,   scale );
         drawTicks(g2d, theTicks[TICKS_1H],    CAP_SQUARE,
                 radius, tick1hWidth, tick1hColor,    scale );
-        g2d.fill( scale.createTransformedShape( new Ellipse2D.Double(
-                -smallCircRadius, -smallCircRadius,
-                2 * smallCircRadius, 2 * smallCircRadius ) ) );
+        g2d.setColor( getForeground());
         /* the figures */
         FontRenderContext frc = g2d.getFontRenderContext();
         GeneralPath       gp  = new GeneralPath();
@@ -316,6 +312,11 @@ public class JChrono extends JComponent {
         drawHand(g2d, secondHand, scale,
                 timestamp % 60_000L * PI / 30.0E3,
                 (float) (secHandWidth * radius), CAP_SQUARE, secondHandColor );
+        g2d.setColor( smallCircleColor );
+        g2d.fill( scale.createTransformedShape( new Ellipse2D.Double(
+                -smallCircRadius, -smallCircRadius,
+                2 * smallCircRadius, 2 * smallCircRadius ) ) );
+        g2d.setColor( getForeground());
     }
 
     public static void main(String[] args) {
@@ -329,11 +330,20 @@ public class JChrono extends JComponent {
             JFrame frame = new JFrame( "Example" );
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.setLayout(new BorderLayout(10, 10));
+            contentPane.setBackground( Color.BLACK);
+            contentPane.setForeground( Color.GREEN);
             JChrono crono = new JChrono();
             crono.hourHandColor   = Color.ORANGE;
-            crono.minuteHandColor = Color.BLUE;
-            crono.secondHandColor = Color.GREEN;
-            crono.tick200msColor  = Color.RED;
+//            crono.minuteHandColor = Color.BLUE;
+            crono.secondHandColor = new Color(255, 0, 0);
+//            crono.tick200msColor  = Color.YELLOW;
+            crono.tick1sColor     = new Color(192, 255, 192); 
+//            crono.tick5sColor     = new Color(192, 255, 192);
+            crono.tick10sColor    = Color.WHITE;
+            crono.tick1hColor     = new Color(192, 128, 0);
+            crono.lbl1hMajorColor = Color.YELLOW;
+            crono.lbl1hMinorColor = Color.CYAN;
+//            crono.lbl5sColor      = Color.LIGHT_GRAY;
             crono.setBorder( new TitledBorder(new LineBorder(Color.blue)/* , "Hola como estas?"*/));
             crono.setPreferredSize( new Dimension(500, 500));
             contentPane.add(crono, BorderLayout.CENTER);
