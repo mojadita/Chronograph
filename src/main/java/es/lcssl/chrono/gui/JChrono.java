@@ -127,8 +127,8 @@ public class JChrono extends JComponent {
                 TICKS_10S   = 3,
                 TICKS_1H    = 4;
     
-    private Shape[]     theTicks;
-    private Stroke[]    theStrokes;
+    private GeneralPath[] theTicks;
+    private BasicStroke[] theStrokes;
     private GeneralPath hourHand        = new GeneralPath(),
                         minuteHand      = new GeneralPath(),
                         secondHand      = new GeneralPath();
@@ -212,6 +212,7 @@ public class JChrono extends JComponent {
                     (float) (width * radius), cap, JOIN_BEVEL ) );
             g.setColor(color);
             g.draw( transf.createTransformedShape( ticks ) );
+            g.setColor(getForeground());
     }
     
     private void drawHand(
@@ -332,6 +333,7 @@ public class JChrono extends JComponent {
             crono.hourHandColor   = Color.ORANGE;
             crono.minuteHandColor = Color.BLUE;
             crono.secondHandColor = Color.GREEN;
+            crono.tick200msColor  = Color.RED;
             crono.setBorder( new TitledBorder(new LineBorder(Color.blue)/* , "Hola como estas?"*/));
             crono.setPreferredSize( new Dimension(500, 500));
             contentPane.add(crono, BorderLayout.CENTER);
