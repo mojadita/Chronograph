@@ -41,6 +41,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
+import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.font.GlyphVector;
@@ -56,17 +57,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.CAP_SQUARE;
 import static java.awt.BasicStroke.JOIN_MITER;
+import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.geom.AffineTransform.getRotateInstance;
 import static java.awt.geom.AffineTransform.getScaleInstance;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.geom.AffineTransform.getRotateInstance;
 import static java.lang.Math.*;
 
 /**
@@ -112,7 +116,7 @@ public class JChrono extends JComponent {
             HOURS_MAJOR_FONT_SIZE_PROPERTY_NAME = "hoursMajorFontSize",
             NUM_HOURS_DAY_PROPERTY_NAME         = "numHoursDay",
             NUM_HOURS_CYCLE_PROPERTY_NAME       = "numHoursCycle",
-            HIGHLIGHTED_HOURS_PROPERTY_NAME     = "highligtedHours",
+            HIGHLIGHTED_HOURS_PROPERTY_NAME     = "highlightedHours",
             TICK_200MS_COLOR_PROPERTY_NAME      = "tick200msColor",
             TICK_1S_COLOR_PROPERTY_NAME         = "tick1sColor",
             TICK_5S_COLOR_PROPERTY_NAME         = "tick5sColor",
@@ -141,7 +145,7 @@ public class JChrono extends JComponent {
         "21", "22", "23",};
 
     private String[] minNames = {
-        "0", "5", "10", "15", "20", "25",
+        "00", "05", "10", "15", "20", "25",
         "30", "35", "40", "45", "50", "55",};
 
     double tickStart = 0.990, /* tick radial start positon (1.0 for all) */
@@ -155,12 +159,6 @@ public class JChrono extends JComponent {
             tick1hMinorEnd     =  0.680,
             hourLabelRadius    =  0.540,
             smallCircleRadius  =  0.030,
-            tick200msWidth     =  0.005,
-            tick1sWidth        =  0.008,
-            tick5sWidth        =  0.016,
-            tick10sWidth       =  0.020,
-            tick1hMinorWidth   =  0.012,
-            tick1hMajorWidth   =  0.036,
             hourTail           = -0.050,
             minTail            = -0.100,
             secTail            = -0.120,
@@ -174,12 +172,19 @@ public class JChrono extends JComponent {
             hoursMinorFontSize =  0.100,
             hoursMajorFontSize =  0.140,
             halfMoonRadius     =  0.040;
-    
+
+    float   tick200msWidth     =  0.005f,
+            tick1sWidth        =  0.008f,
+            tick5sWidth        =  0.016f,
+            tick10sWidth       =  0.020f,
+            tick1hMinorWidth   =  0.012f,
+            tick1hMajorWidth   =  0.036f;
+
     int     numHours           = 24,
             numHoursCycle      = 24,
-            hilightedHours     =  8;
+            highlightedHours   =  8;
 
-    Color tick200msColor,
+    Color   tick200msColor,
             tick1sColor,
             tick5sColor,
             tick10sColor,
@@ -194,49 +199,18 @@ public class JChrono extends JComponent {
 
     PropertyChangeSupport pcs;
 
-    private transient List<AbstractDrawable> 
+    private transient List<AbstractDrawable>
             staticParts;
-    
-    private AbstractDrawable
+
+    private transient AbstractDrawable
             secondHand,
             minuteHand,
             hourHand;
 
+    double oldRadius = 0.0;
+
     public JChrono() {
-        staticParts = new ArrayList<>();
-        staticParts.add( new Ticks200ms( tick200msColor, (float) tick200msWidth ) );
-        staticParts.add( new Ticks1s(    tick1sColor, (float) tick1sWidth ) );
-        staticParts.add( new Ticks5s(    tick5sColor, (float) tick5sWidth ) );
-        staticParts.add( new Ticks10s(   tick10sColor, (float) tick10sWidth ) );
-        staticParts.add( new LabeledHours( n -> n % hilightedHours == 0 ) );
 
-        secondHand = new SecondsHand(
-                secondHandColor,
-                secondHandColor,
-                CAP_SQUARE,
-                (float) secHandWidth,
-                secHead,
-                secTail,
-                smallCircleRadius,
-                halfMoonRadius);
-
-        minuteHand = new SimpleHand(
-                minuteHandColor,
-                minuteHandColor,
-                CAP_ROUND,
-                (float) minHandWidth,
-                minHead,
-                minTail);
-
-        hourHand = new SimpleHand(
-                hourHandColor,
-                hourHandColor,
-                CAP_ROUND,
-                (float) hourHandWidth,
-                hourHead,
-                hourTail);
-
-        timer.start();
     }
 
     Timer timer = new Timer(
@@ -245,450 +219,307 @@ public class JChrono extends JComponent {
 
     private abstract class AbstractDrawable {
 
-        protected Shape
-                shapeToDraw,
-                shapeToFill;
-        protected Color
-                colorToDraw,
-                colorToFill;
-
-        private double lineWidth;
-        private int    strokeCap = CAP_SQUARE;
+        protected GeneralPath[]
+                shapeToFill,
+                shapeToDraw;
+        protected Paint[]
+                paintToFill,
+                paintToDraw;
+        protected Stroke[]
+                strokeToDraw;
+        protected Font[]
+                fontToRender;
 
         public AbstractDrawable(
-                Color p_color_to_draw,
-                Color p_color_to_fill,
-                int p_stroke_cap,
-                float p_line_width)
+                GeneralPath[] p_shape_to_fill,
+                GeneralPath[] p_shape_to_draw,
+                Paint[]       p_paint_to_fill,
+                Paint[]       p_paint_to_draw,
+                Stroke[]      p_stroke_to_draw,
+                Font[]        p_font_to_render)
         {
-            colorToDraw = p_color_to_draw;
-            colorToFill = p_color_to_fill;
-            strokeCap = p_stroke_cap;
-            lineWidth = p_line_width;
+            shapeToFill       = p_shape_to_fill;
+            shapeToDraw       = p_shape_to_draw;
+            paintToFill       = p_paint_to_fill;
+            paintToDraw       = p_paint_to_draw;
+            fontToRender      = p_font_to_render;
+        }
+
+        protected abstract void buildScaledFigures(
+                Graphics2D g2d, double new_radius);
+
+        protected <T> boolean isValid(
+                T[] array)
+        {
+            return     array != null
+                    && array.length > 0;
+        }
+
+        protected <T> boolean isValid(
+                T[] array,
+                int p_index)
+        {
+            return     isValid(array)
+                    && array.length > p_index
+                    && array[p_index] != null;
+        }
+
+        private void consume(
+                Shape[]  p_shape,
+                Paint[]  p_paint,
+                Stroke[] p_stroke,
+                Font[]   p_font,
+                Graphics2D p_gc,
+                AffineTransform p_rotation,
+                Consumer<Shape> p_what_to_do)
+        {
+            if (isValid(p_shape)) {
+                for (int i = 0; i < p_shape.length; ++i) {
+                    if (!isValid(p_shape, i))
+                        continue; /* nothing to do */
+
+                    if (isValid( p_paint, i ))
+                        p_gc.setPaint( p_paint[i] );
+                    if (isValid( p_stroke, i ))
+                        p_gc.setStroke( p_stroke[i] );
+                    if (isValid( p_font, i ))
+                        p_gc.setFont( p_font[i] );
+
+                    /* and proceed to consume with p_what_to_do */
+                    if (p_rotation == null)
+                        p_what_to_do.accept(p_shape[i] ); /* draw it!! */
+                    else
+                        p_what_to_do.accept(p_rotation  /* rotate & draw it!! */
+                                .createTransformedShape(
+                                        p_shape[i] ) );
+                }
+            }
         }
 
         void draw(
-                Graphics2D p_gc,
+                Graphics2D      p_gc,
                 AffineTransform p_at,
-                double p_scale, /* for width of lines */
-                Double p_rotation)
+                double          p_radius,
+                Double          p_rotation)
         {
-            /* melt both transformations into one */
-            if (p_rotation != null) {
-                p_at = (AffineTransform) p_at.clone();
-                p_at.concatenate(getRotateInstance(-p_rotation));
+            /* scale figures if radius has been changed */
+            if (oldRadius != p_radius) {
+                buildScaledFigures( p_gc, p_radius );
+                oldRadius = p_radius;
             }
 
-            if (shapeToFill != null) {
-                if (colorToFill != null) {
-                    p_gc.setColor(colorToFill);
-                } else {
-                    p_gc.setColor(getForeground());
-                }
-                p_gc.fill(p_at.createTransformedShape(shapeToFill));
+            AffineTransform rotation = null;
+            if (p_rotation != null && p_rotation != 0.0) {
+                /* we are assuming rotations are done clockwise, so
+                 * the parameter must be < 0 to reflect the walking
+                 * time.  */
+                rotation = getRotateInstance( -p_rotation );
             }
 
-            if (shapeToDraw != null) {
-                if (colorToDraw != null) {
-                    p_gc.setColor(colorToDraw);
-                }
-                p_gc.setStroke(new BasicStroke(
-                        (float) (lineWidth * p_scale),
-                        strokeCap,
-                        BasicStroke.JOIN_BEVEL));
-                p_gc.draw(p_at.createTransformedShape(shapeToDraw));
+            /* filling shapes that must be filled */
+            consume( shapeToFill,
+                     paintToFill,
+                     null,  /* no draw is done here, so Strokes are not used.  */
+                     null,
+                     p_gc,
+                     rotation,
+                     p_gc::fill );
+
+            /* drawing shapes that must be drawn */
+            consume( shapeToDraw,
+                     paintToDraw,
+                     strokeToDraw,
+                     null,  /* no drawString, so no font info is used */
+                     p_gc,
+                     rotation,
+                     p_gc::draw );
+        }
+    } /* AbstractDrawable */
+
+    private class StaticDrawable extends AbstractDrawable {
+
+        public static final int
+                IX_200MS    = 0,
+                IX_1S       = 1,
+                IX_5S       = 2,
+                IX_10S      = 3,
+                IX_1H_MINOR = 4,
+                IX_1H_MAJOR = 5,
+                IX_COUNT    = 6;
+
+
+        public StaticDrawable() {
+
+            super(  new GeneralPath[IX_COUNT], /* shapeToFill */
+                    new GeneralPath[IX_COUNT], /* shapeToDraw */
+                    new Paint[IX_COUNT],       /* paintToFill */
+                    new Paint[] {              /* p_paint_to_draw */
+                        tick200msColor,
+                        tick1sColor,
+                        tick5sColor,
+                        tick10sColor,
+                        lbl1hMinorColor,
+                        lbl1hMajorColor},
+                    new BasicStroke[IX_COUNT], /* p_stroke_to_draw (need
+                                                * to be built on
+                                                * scaling) */
+                    new Font[IX_COUNT]);       /* p_font_to_fill (need
+                                                * to be built on
+                                                * scaling) */
+        }
+
+        @Override
+        protected void buildScaledFigures(
+                Graphics2D p_g2d,
+                double     p_new_radius) {
+            /* no rotation */
+            /* generate the SECONDS ticks */
+            double[] tick_start_radius = {
+                tickStart, tickStart, tickStart,
+                tickStart, tick1hStart, tick1hStart,
+            };
+            double[] tick_end_radius = {
+                tick200msEnd, tick1sEnd, tick5sEnd,
+                tick10sEnd, tick1hMinorEnd, tick1hMajorEnd,
+            };
+            float[] tick_width = {
+                tick200msWidth, tick1sWidth, tick5sWidth,
+                tick10sWidth, tick1hMinorWidth, tick1hMajorWidth,
+            };
+            int[] tick_cap = {
+                CAP_ROUND, CAP_ROUND, CAP_SQUARE, CAP_SQUARE,
+                CAP_ROUND, CAP_ROUND
+            };
+
+            shapeToDraw[IX_200MS]   = new GeneralPath();
+            shapeToDraw[IX_1S]      = new GeneralPath();
+            shapeToDraw[IX_5S]      = new GeneralPath();
+            shapeToDraw[IX_10S]     = new GeneralPath();
+            shapeToDraw[IX_1H_MINOR]= new GeneralPath();
+            shapeToDraw[IX_1H_MAJOR]= new GeneralPath();
+
+            final int N1 = 300;
+            int which_to_add;
+            for (int i = 0; i < N1; ++i) {
+                double angle = 2.0 * PI * i / N1;
+                double x_scaled =  sin(angle) * p_new_radius,
+                       y_scaled = -cos(angle) * p_new_radius;
+                     if (i % 50 == 0) which_to_add = IX_10S;
+                else if (i % 25 == 0) which_to_add = IX_5S;
+                else if (i %  5 == 0) which_to_add = IX_1S;
+                else                  which_to_add = IX_200MS;
+
+                shapeToDraw[which_to_add].moveTo(
+                        x_scaled * tick_start_radius[which_to_add],
+                        y_scaled * tick_start_radius[which_to_add]);
+                shapeToDraw[which_to_add].lineTo(
+                        x_scaled * tick_end_radius[which_to_add],
+                        y_scaled + tick_end_radius[which_to_add]);
+                strokeToDraw[which_to_add] =
+                        new BasicStroke(tick_width[which_to_add],
+                                tick_cap[i], 0 );
+            }
+
+            /* now the figures associated with minutes & seconds */
+            shapeToFill[IX_5S]  = new GeneralPath();
+            Font font_to_render = minutesFont.deriveFont(
+                     (float)(p_new_radius * minutesFontSize));
+            FontRenderContext font_render_context
+                    = p_g2d.getFontRenderContext();
+
+            final int N2 = 12;
+            for (int i = 0; i < N2; ++i) {
+                double angle = 2.0 * PI * i / N2;
+                double x_scaled =  sin(angle) * p_new_radius,
+                       y_scaled = -cos(angle) * p_new_radius;
+
+                GlyphVector glyph_vector = font_to_render
+                        .createGlyphVector(
+                                font_render_context, minNames[i] );
+                Rectangle2D bounds = glyph_vector.getVisualBounds();
+                shapeToFill[IX_5S].append( glyph_vector.getOutline(
+                        (float)(x_scaled - bounds.getCenterX()),
+                        (float)(y_scaled - bounds.getCenterY() )),
+                        false );
+            }
+            shapeToFill[IX_5S].closePath();
+
+            /* time for the hours */
+            shapeToDraw[IX_1H_MAJOR] = new GeneralPath();
+            shapeToFill[IX_1H_MAJOR] = new GeneralPath();
+            shapeToDraw[IX_1H_MINOR] = new GeneralPath();
+            shapeToFill[IX_1H_MINOR] = new GeneralPath();
+
+            Font major_font = majorHoursFont.deriveFont(
+                    (float)( p_new_radius * hoursMajorFontSize));
+            Font minor_font = minorHoursFont.deriveFont(
+                    (float)( p_new_radius * hoursMinorFontSize));
+
+            for (int i = 0; i < numHoursCycle; ++i) {
+                boolean is_major = i % highlightedHours == 0;
+                Font which_font = is_major ? major_font : minor_font;
+                int which_shape = is_major ? IX_1H_MAJOR : IX_1H_MINOR;
+                double angle = i * 2.0 * PI / numHoursCycle,
+                        x_scaled =  sin(angle) * p_new_radius,
+                        y_scaled = -cos(angle) * p_new_radius;
+
+                /* draw the ticks */
+                shapeToDraw[which_shape].moveTo(
+                        x_scaled * tick_start_radius[which_shape],
+                        y_scaled * tick_start_radius[which_shape]);
+                shapeToDraw[which_shape].lineTo(
+                        x_scaled * tick_start_radius[which_shape],
+                        y_scaled * tick_end_radius[which_shape]);
+
+                /* fill the shapes */
+                font_render_context
+                        = p_g2d.getFontRenderContext();
+                GlyphVector gv = which_font.createGlyphVector(
+                        font_render_context, hourNames[i] );
+                Rectangle2D bounds = gv.getVisualBounds();
+
+                shapeToFill[which_shape].append( gv.getOutline(
+                        (float)(x_scaled - bounds.getCenterX()),
+                        (float)(y_scaled - bounds.getCenterY())),
+                        false);
             }
         }
-    }
+    } /* StaticPartDrawable */
 
     private class SimpleHand extends AbstractDrawable {
 
+        double head, tail, width;
+        int    capStyle;
+
         public SimpleHand(
-                Color p_color_to_draw,
-                Color p_color_to_fill,
-                int p_stroke_cap,
-                float p_line_width,
-                double p_head_radius,
-                double p_tail_radius) {
-            super(p_color_to_draw, p_color_to_fill, p_stroke_cap, p_line_width);
-            GeneralPath shape_to_draw = new GeneralPath();
-            shapeToDraw = shape_to_draw;
-            shape_to_draw.moveTo(0.0, -p_head_radius);
-            shape_to_draw.lineTo(0.0, -p_tail_radius);
-        }
-    }
+                Color p_color,
+                int   p_stroke_cap,
+                double p_head,
+                double p_tail,
+                float p_line_width)
+        {
+            super(  new GeneralPath[1],    /* p_shape_to_fill */
+                    null,                  /* p_shape_to_draw */
+                    null,                  /* p_paint_to_fill */
+                    new Color[] {p_color}, /* p_paint_to_draw */
+                    new Stroke[1],         /* p_stroke_to_draw */
+                    null);                 /* p_font_to_render */
 
-    /* seconds hand is different as it shows a half moon at the tail
-     * and a small circle in the clock center */
-    private class SecondsHand extends SimpleHand {
-
-        public SecondsHand(
-                Color p_color_to_draw,
-                Color p_color_to_fill,
-                int p_stroke_cap,
-                float p_line_width,
-                double p_head_radius,
-                double p_tail_radius,
-                double p_small_circle_radius,
-                double p_half_moon_radius) {
-            super(p_color_to_draw,
-                    p_color_to_fill,
-                    p_stroke_cap,
-                    p_line_width,
-                    p_head_radius,
-                    p_tail_radius);
-
-            /* Half moon in tail */
-            GeneralPath shape_to_fill;
-            shapeToFill = shape_to_fill = new GeneralPath();
-            double half_moon_diameter = 2.0 * p_half_moon_radius;
-            Area half_moon = new Area(
-                    new Ellipse2D.Double(
-                            -p_half_moon_radius,
-                            -p_tail_radius,
-                            half_moon_diameter,
-                            half_moon_diameter));
-            half_moon.subtract(new Area(
-                    new Ellipse2D.Double(
-                            -p_half_moon_radius,
-                            -p_tail_radius + p_half_moon_radius / 2.0,
-                            half_moon_diameter,
-                            half_moon_diameter)));
-            shape_to_fill.append(new GeneralPath(half_moon), false);
-
-            /* small circle */
-            double small_circle_diameter = 2.0 * p_small_circle_radius;
-            shape_to_fill.append(
-                    new Area (new Ellipse2D.Double(
-                            -p_small_circle_radius,
-                            -p_small_circle_radius,
-                            small_circle_diameter,
-                            small_circle_diameter)),
-                    true);
-        }
-    }
-
-    private class Ticks200ms extends AbstractDrawable {
-
-        public Ticks200ms(
-                Color p_color_to_draw,
-                float p_line_width) {
-            super(p_color_to_draw,
-                    null,
-                    BasicStroke.CAP_ROUND,
-                    p_line_width);
-
-            GeneralPath shape_path = new GeneralPath();
-            shapeToDraw = shape_path;
-            final int N = 300;
-            /* 300 200ms ticks */
-
-            for (int i = 0; i < N; ++i) {
-                if (i % 5 == 0) {
-                    continue;
-                }
-                double angle = 2.0 * PI * i / N;
-                double sin_angle = sin(angle);
-                double cos_angle = cos(angle);
-                shape_path.moveTo(
-                        sin_angle * tickStart,
-                        -cos_angle * tickStart);
-                shape_path.lineTo(
-                        sin_angle * tick200msEnd,
-                        -cos_angle * tick200msEnd);
-            }
-        }
-    }
-
-    private class Ticks1s extends AbstractDrawable {
-
-        public Ticks1s(
-                Color p_color_to_draw,
-                float p_line_width) {
-            super(p_color_to_draw,
-                    null,
-                    BasicStroke.CAP_ROUND,
-                    p_line_width);
-
-            GeneralPath shape_path = new GeneralPath();
-            shapeToDraw = shape_path;
-            final int N = 60;
-            /* 60 1s ticks */
-
-            for (int i = 0; i < N; ++i) {
-                if (i % 5 == 0) {
-                    continue;
-                }
-                double angle = 2.0 * PI * i / N;
-                double sin_angle = sin(angle);
-                double cos_angle = cos(angle);
-                shape_path.moveTo(
-                        sin_angle * tickStart,
-                        -cos_angle * tickStart);
-                shape_path.lineTo(
-                        sin_angle * tick1sEnd,
-                        -cos_angle * tick1sEnd);
-            }
-        }
-    }
-
-    private class Ticks5s extends AbstractDrawable {
-
-        protected static final int N = 12;
-
-        public Ticks5s(
-                Color p_color_to_draw,
-                float p_line_width) {
-            super(p_color_to_draw,
-                    null, // p_color_to_fill
-                    BasicStroke.CAP_SQUARE,
-                    p_line_width);
-
-            GeneralPath shape_path = new GeneralPath();
-            shapeToDraw = shape_path;
-
-            for (int i = 0; i < N; ++i) {
-                double angle = 2.0 * PI * i / N;
-                double sin_angle = sin(angle);
-                double cos_angle = cos(angle);
-                shape_path.moveTo(
-                         sin_angle * tickStart,
-                        -cos_angle * tickStart);
-                shape_path.lineTo(
-                         sin_angle * tick5sEnd,
-                        -cos_angle * tick5sEnd);
-            }
+            head     = p_head;
+            tail     = p_tail;
+            width    = p_line_width;
+            capStyle = p_stroke_cap;
         }
 
         @Override
-        void draw(
-                Graphics2D      p_gc,
-                AffineTransform p_at,
-                double          p_scale,    /* for width of lines */
-                Double          p_rotation) /* rotation is ignored here */
-        {
-            GeneralPath shape_to_fill;
-            if (shapeToFill == null) {
-                shapeToFill = shape_to_fill = new GeneralPath();
-                Font font = minutesFont.deriveFont((float) minutesFontSize);
-                for (int i = 0; i < N; ++i) {
-                    double angle = 2.0 * PI * i / N,
-                            sin_angle = sin(angle),
-                            cos_angle = cos(angle);
-                    FontRenderContext frc = p_gc.getFontRenderContext();
-                    GlyphVector gv = font.createGlyphVector(
-                            frc, minNames[i]);
-                    Rectangle2D bounds = gv.getLogicalBounds();
-                    
-                    shape_to_fill.append(gv.getOutline( 
-                            (float)( sin_angle * secsLabelRadius - bounds.getCenterX()),
-                            (float)(-cos_angle * secsLabelRadius - bounds.getCenterY())),
-                            false);
-                }
-                shape_to_fill.closePath();
-            }
-            super.draw(p_gc, p_at, p_scale, p_rotation);
+        protected void buildScaledFigures(Graphics2D p_g2d, double p_new_radius) {
+            GeneralPath path = shapeToDraw[0] = new GeneralPath();
+            strokeToDraw[0] = new BasicStroke(
+                    (float)(width * p_new_radius),
+                    capStyle, CAP_ROUND);
+            path.moveTo( 0.0, -p_new_radius * head);
+            path.lineTo( 0.0, -p_new_radius * tail);
         }
-    }
-
-    private class Ticks10s extends AbstractDrawable {
-
-        public Ticks10s(
-                Color p_color_to_draw,
-                float p_line_width) {
-            super(p_color_to_draw,
-                    null,
-                    BasicStroke.CAP_SQUARE,
-                    p_line_width);
-
-            GeneralPath shape_to_draw = new GeneralPath();
-            shapeToDraw = shape_to_draw;
-            final int N = 6;
-            /* 6 10s ticks */
-
-            for (int i = 0; i < N; ++i) {
-                double angle = 2.0 * PI * i / N;
-                double sin_angle = sin(angle);
-                double cos_angle = cos(angle);
-
-                shape_to_draw.moveTo(
-                         sin_angle * tickStart,
-                        -cos_angle * tickStart);
-                shape_to_draw.lineTo(
-                         sin_angle * tick10sEnd,
-                        -cos_angle * tick10sEnd);
-            }
-        }
-    }
-    
-    private class LabeledHours extends AbstractDrawable {
-        
-        /* minors are in superclass */
-        protected Shape 
-                majorToDraw,
-                majorToFill;
-        protected Predicate<Integer>
-                majorPredicate;
-        protected Stroke
-                majorStroke;
-
-        public LabeledHours(
-                Predicate<Integer> p_majors)
-        {
-            super(tick1hColor, lbl1hMinorColor,
-                    CAP_ROUND, (float) tick1hMinorWidth );
-
-            majorPredicate = p_majors;
-            
-            GeneralPath
-                    major_to_draw = new GeneralPath(),
-                    minor_to_draw = new GeneralPath();
-            majorToDraw = major_to_draw;
-            shapeToDraw = minor_to_draw; /* minor is in superclass */
-
-            for (int i = 0; i < numHoursCycle; ++i) {                
-                
-                double angle = 2.0 * PI * i / numHoursCycle;
-                double sin_angle = sin(angle);
-                double cos_angle = cos(angle);
-                
-                boolean is_major = majorPredicate.test( i );
-                GeneralPath which_to_draw
-                        = is_major
-                        ? major_to_draw
-                        : minor_to_draw;
-                
-                double tick_end = is_major
-                        ? tick1hMajorEnd
-                        : tick1hMinorEnd; 
-                
-                which_to_draw.moveTo(
-                         sin_angle * tick1hStart,
-                        -cos_angle * tick1hStart);
-                which_to_draw.lineTo(sin_angle * tick_end,
-                        -cos_angle * tick_end);
-            }
-        }
-
-        @Override
-        void draw(
-                Graphics2D      p_gc,
-                AffineTransform p_at,
-                double          p_scale,    /* for width of lines */
-                Double          p_rotation) /* rotation is ignored here */
-        {
-            if (majorToFill == null | shapeToFill == null) {
-                
-                Font font_major = majorHoursFont.deriveFont(
-                        (float) hoursMajorFontSize ),
-                        font_minor = minorHoursFont.deriveFont(
-                                (float) hoursMinorFontSize );
-                GeneralPath major_to_fill = new GeneralPath(),
-                        minor_to_fill = new GeneralPath();
-                
-                majorToFill = major_to_fill;
-                shapeToFill = minor_to_fill;
-
-                for (int i = 0; i < numHoursCycle; ++i) {
-                    double angle = 2.0 * PI * i / numHoursCycle,
-                            sin_angle = sin( angle ),
-                            cos_angle = cos( angle );
-
-                    boolean isMajor = majorPredicate.test( i );
-
-                    Font which_font = isMajor ? font_major : font_minor;
-
-                    FontRenderContext frc = p_gc.getFontRenderContext();
-                    GlyphVector gv = which_font.createGlyphVector(
-                            frc, hourNames[i] );
-                    Rectangle2D bounds = gv.getLogicalBounds();
-
-                    GeneralPath which_shape_to_fill = isMajor
-                            ? major_to_fill
-                            : minor_to_fill;
-
-                    which_shape_to_fill.append( gv.getOutline(
-                            (float) (sin_angle * hourLabelRadius
-                            - bounds.getCenterX()),
-                            (float) (-cos_angle * hourLabelRadius
-                            - bounds.getCenterY()) ),
-                            false );
-                    /* don't connect to previous shape */
-                }
-                major_to_fill.closePath();
-                minor_to_fill.closePath();
-            }
-
-            super.draw(p_gc, p_at, p_scale, 0.0);
-
-
-            if (colorToFill != null) {
-                p_gc.setColor(colorToFill);
-            } else {
-                p_gc.setColor(getForeground());
-            }
-            majorStroke = new BasicStroke(
-                    (float) (tick1hMajorWidth * p_scale),
-                    CAP_SQUARE, JOIN_MITER );
-            p_gc.setStroke( majorStroke );
-            p_gc.draw( p_at.createTransformedShape( majorToDraw ) );
-            p_gc.fill( p_at.createTransformedShape( majorToFill ) );
-
-        }
-    }
-
-
-    @Override
-    protected void paintComponent(Graphics g) {
-
-        super.paintComponent(g);
-
-        Graphics2D g2d = (Graphics2D) g;
-
-        /* get a new graphics2D so we can mangle it */
-        g2d = (Graphics2D) g2d.create();
-
-        g2d.setRenderingHint(
-                KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(
-                KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
-
-
-        /* we don't paint on the insets zone */
-        Insets insets = getInsets();
-        int width = getWidth(), height = getHeight();
-
-        width -= insets.left + insets.right;
-        height -= insets.top + insets.bottom;
-
-        double radius = Math.min(width, height) / 2.0;
-        g2d.translate(insets.left + width / 2, insets.top + height / 2);
-
-        /* Draw the ticks */
-        /* 200ms ticks */
-        AffineTransform scale = getScaleInstance(radius, radius);
-
-        for (AbstractDrawable d : staticParts) {
-            d.draw(g2d, scale, radius, null);
-            /* not rotating */
-        }
-
-        long timestamp = System.currentTimeMillis();
-        timestamp -= new Date(timestamp).getTimezoneOffset() * 60_000;
-
-        /* hours hand */
-        double hour_angle = (timestamp % 86_400_000) * 2.0 * PI / 86_400_000.0;
-        hourHand.draw(g2d, scale, radius, -hour_angle);
-        /* to get clockwise movement */
-
-        /* minutes hand */
-        double min_angle = (timestamp % 3_600_000) * 2.0 * PI / 3_600_000.0;
-        minuteHand.draw(g2d, scale, radius, -min_angle);
-        /* negative to get clockwise movement */
-
-        /* seconds hand */
-        double sec_angle = (timestamp % 60_000) * 2.0 * PI / 60_000.0;
-        secondHand.draw(g2d, scale, radius, -sec_angle);
     }
 
     /* ****************************************************************/
@@ -708,7 +539,7 @@ public class JChrono extends JComponent {
                     old_majorHoursFont, majorHoursFont);
         }
     }
-    
+
     @BeanProperty
     public Font getMinorHoursFont() {
         return minorHoursFont;
@@ -933,11 +764,11 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick200msWidth() {
+    public float getTick200msWidth() {
         return tick200msWidth;
     }
 
-    public void setTick200msWidth(double p_tick200msWidth) {
+    public void setTick200msWidth(float p_tick200msWidth) {
         double old_tick200msWidth = tick200msWidth;
         tick200msWidth = p_tick200msWidth;
         if (old_tick200msWidth != p_tick200msWidth) {
@@ -947,12 +778,12 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick1sWidth() {
+    public float getTick1sWidth() {
         return tick1sWidth;
     }
 
-    public void setTick1sWidth(double p_tick1sWidth) {
-        double old_tick1sWidth = tick1sWidth;
+    public void setTick1sWidth(float p_tick1sWidth) {
+        float old_tick1sWidth = tick1sWidth;
         tick1sWidth = p_tick1sWidth;
         if (old_tick1sWidth != p_tick1sWidth) {
             pcs.firePropertyChange(
@@ -962,12 +793,12 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick5sWidth() {
+    public float getTick5sWidth() {
         return tick5sWidth;
     }
 
-    public void setTick5sWidth(double p_tick5sWidth) {
-        double old_setTick5sWidth = tick5sWidth;
+    public void setTick5sWidth(float p_tick5sWidth) {
+        float old_setTick5sWidth = tick5sWidth;
         tick5sWidth = p_tick5sWidth;
         if (old_setTick5sWidth != p_tick5sWidth) {
             pcs.firePropertyChange(
@@ -977,12 +808,12 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick10sWidth() {
+    public float getTick10sWidth() {
         return tick10sWidth;
     }
 
-    public void setTick10sWidth(double p_tick10sWidth) {
-        double old_tick10sWidth = tick10sWidth;
+    public void setTick10sWidth(float p_tick10sWidth) {
+        float old_tick10sWidth = tick10sWidth;
         tick10sWidth = p_tick10sWidth;
         if (old_tick10sWidth != p_tick10sWidth) {
             pcs.firePropertyChange(
@@ -992,12 +823,12 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick1hMinorWidth() {
+    public float getTick1hMinorWidth() {
         return tick1hMinorWidth;
     }
 
-    public void setTick1hMinorWidth(double p_tick1hMinorWidth) {
-        double old_tick1hMinorWidth = tick1hMinorWidth;
+    public void setTick1hMinorWidth(float p_tick1hMinorWidth) {
+        float old_tick1hMinorWidth = tick1hMinorWidth;
         tick1hMinorWidth = p_tick1hMinorWidth;
         if (old_tick1hMinorWidth != p_tick1hMinorWidth) {
             pcs.firePropertyChange(
@@ -1007,15 +838,15 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public double getTick1hMajorWidth() {
+    public float getTick1hMajorWidth() {
         return tick1hMajorWidth;
     }
 
-    public void setTick1hMajorWidth(double p_tick1hMajorWidth) {
-        double old_tick1hMajorWidth = tick1hMajorWidth;
+    public void setTick1hMajorWidth(float p_tick1hMajorWidth) {
+        float old_tick1hMajorWidth = tick1hMajorWidth;
         tick1hMajorWidth = p_tick1hMajorWidth;
         if (old_tick1hMajorWidth != p_tick1hMajorWidth) {
-            pcs.firePropertyChange( 
+            pcs.firePropertyChange(
                     TICK_1H_MAJOR_WIDTH_PROPERTY_NAME,
                     old_tick1hMajorWidth, p_tick1hMajorWidth);
         }
@@ -1233,17 +1064,17 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public int getHilightedHours() {
-        return hilightedHours;
+    public int getHighlightedHours() {
+        return highlightedHours;
     }
 
-    public void setHilightedHours(int p_hilightedHours) {
-        int old_hilightedHours = hilightedHours;
-        hilightedHours = p_hilightedHours;
-        if (old_hilightedHours != p_hilightedHours) {
+    public void setHighlightedHours(int p_highlightedHours) {
+        int old_highlightedHours = highlightedHours;
+        highlightedHours = p_highlightedHours;
+        if (old_highlightedHours != p_highlightedHours) {
             pcs.firePropertyChange(
                     HIGHLIGHTED_HOURS_PROPERTY_NAME,
-                    old_hilightedHours, p_hilightedHours);
+                    old_highlightedHours, p_highlightedHours);
         }
     }
 
@@ -1456,7 +1287,7 @@ public class JChrono extends JComponent {
                     old_halfMoonRadius, p_halfMoonRadius);
         }
     }
-    
+
 
     /* ********************* GETTERS AND SETTERS **********************/
     /* ****************************************************************/
@@ -1504,4 +1335,4 @@ public class JChrono extends JComponent {
             frame.setVisible(true);
         });
     }
-}
+    }
