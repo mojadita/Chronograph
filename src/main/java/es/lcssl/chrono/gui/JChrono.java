@@ -129,14 +129,14 @@ public class JChrono extends JComponent {
     private Font minorHoursFont = new Font("Serif", Font.ITALIC, 1);
     private Font minutesFont    = new Font("Serif", Font.ROMAN_BASELINE, 1);
 
-    private String[] hourNames = {
+    private final String[] hourNames = {
         "0", "1", "2", "3", "4", "5",
         "6", "7", "8", "9", "10",
         "11", "12", "13", "14", "15",
         "16", "17", "18", "19", "20",
         "21", "22", "23",};
 
-    private String[] minNames = {
+    private final String[] minNames = {
         "00", "05", "10", "15", "20", "25",
         "30", "35", "40", "45", "50", "55",};
 
@@ -192,7 +192,7 @@ public class JChrono extends JComponent {
 
     PropertyChangeSupport pcs;
 
-    private transient AbstractDrawable
+    private transient final AbstractDrawable
             staticPart,
             secondHand,
             minuteHand,
@@ -215,6 +215,7 @@ public class JChrono extends JComponent {
         timer.start();
     }
 
+    @SuppressWarnings("this-escape")
     Timer timer = new Timer(
             23,
             e -> { invalidate(); repaint(); });
@@ -585,6 +586,7 @@ public class JChrono extends JComponent {
     } /* SecondHand */
 
     @Override
+    @SuppressWarnings("deprecation")
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -1405,26 +1407,26 @@ public class JChrono extends JComponent {
             System.exit(0);
         }
         EventQueue.invokeLater(() -> {
-            JFrame frame = new JFrame("Example");
+            JFrame frame = new JFrame("Royex Oyster Perpetuam!!!");
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.setLayout(new BorderLayout(10, 10));
             JChrono crono = new JChrono();
             JScrollPane scp = new JScrollPane(crono);
-//            crono.hourHandColor   = Color.ORANGE;
-//            crono.minuteHandColor = Color.BLUE;
-//            crono.secondHandColor = Color.RED;
-//            crono.tick200msColor  = Color.YELLOW;
-//            crono.tick1sColor     = new Color(192, 255, 192);
-//            crono.tick5sColor     = new Color(192, 255, 192);
-//            crono.tick10sColor    = Color.WHITE;
-//            crono.tick1hColor     = new Color(192, 128, 0);
-//            crono.lbl1hMajorColor = Color.YELLOW;
-//            crono.lbl1hMinorColor = Color.CYAN;
-//            crono.lbl5sColor      = Color.LIGHT_GRAY;
+            crono.hourHandColor   = Color.ORANGE;
+            crono.minuteHandColor = Color.BLUE;
+            crono.secondHandColor = Color.RED;
+            crono.tick200msColor  = Color.YELLOW;
+            crono.tick1sColor     = new Color(192, 255, 192);
+            crono.tick5sColor     = new Color(192, 255, 192);
+            crono.tick10sColor    = Color.WHITE;
+            crono.tick1hColor     = new Color(192, 128, 0);
+            crono.lbl1hMajorColor = Color.YELLOW;
+            crono.lbl1hMinorColor = Color.CYAN;
+            crono.lbl5sColor      = Color.LIGHT_GRAY;
 //            contentPane.setBorder(
 //                    new TitledBorder(new LineBorder(Color.blue),
 //                            "Hola como estas?"));
-            int N = 500;
+            int N = 100;
             crono.setPreferredSize(new Dimension(N, N));
             contentPane.add(scp, BorderLayout.CENTER);
 //            contentPane.add(
