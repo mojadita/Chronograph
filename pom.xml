@@ -20,7 +20,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <exec.mainClass>es.lcssl.chrono.Main</exec.mainClass>
+        <exec.mainClass>es.lcssl.chrono.gui.JChrono</exec.mainClass>
     </properties>    
 
     <dependencies>
