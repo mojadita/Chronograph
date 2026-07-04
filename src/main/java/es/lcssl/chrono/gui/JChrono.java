@@ -30,42 +30,43 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.Font;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.font.GlyphVector;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.beans.BeanProperty;
+import java.beans.PropertyChangeSupport;
+import java.util.Date;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.Objects;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
 
-import java.beans.BeanProperty;
-import java.beans.PropertyChangeSupport;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.Date;
-
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.CAP_SQUARE;
 import static java.awt.BasicStroke.JOIN_ROUND;
+import static java.awt.geom.AffineTransform.getRotateInstance;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.geom.AffineTransform.getRotateInstance;
 import static java.lang.Math.*;
 
 /**
+ * Analog clock to implement wall clock and chronometer.
  *
  * @author Luis Colorado {@code <luiscoloradourcola@gmail.com>}
  */
@@ -113,7 +114,8 @@ public class JChrono extends JComponent {
             TICK_1S_COLOR_PROPERTY_NAME         = "tick1sColor",
             TICK_5S_COLOR_PROPERTY_NAME         = "tick5sColor",
             TICK_10S_COLOR_PROPERTY_NAME        = "tick10sColor",
-            TICK_1H_COLOR_PROPERTY_NAME         = "tick1hColor",
+            TICK_1H_MINOR_COLOR_PROPERTY_NAME   = "tick1hMinorColor",
+            TICK_1H_MAJOR_COLOR_PROPERTY_NAME   = "tick1hMajorColor",
             LABEL_5S_COLOR_PROPERTY_NAME        = "label5sColor",
             LABEL_1H_MAJOR_COLOR_PROPERTY_NAME  = "label1hMajorColor",
             LABEL_1H_MINOR_COLOR_PROPERTY_NAME  = "label1hMinorColor",
@@ -125,20 +127,21 @@ public class JChrono extends JComponent {
 
     private static final long serialVersionUID = 1L;
 
-    private Font majorHoursFont = new Font("Serif", Font.BOLD, 1);
-    private Font minorHoursFont = new Font("Serif", Font.ITALIC, 1);
-    private Font minutesFont    = new Font("Serif", Font.ROMAN_BASELINE, 1);
+    private Font majorHoursFont = new Font("SansSerif", Font.BOLD, 1);
+    private Font minorHoursFont = new Font("SansSerif", Font.ITALIC, 1);
+    private Font minutesFont    = new Font("SansSerif", Font.ROMAN_BASELINE, 1);
 
     private final String[] hourNames = {
-        "0", "1", "2", "3", "4", "5",
-        "6", "7", "8", "9", "10",
-        "11", "12", "13", "14", "15",
-        "16", "17", "18", "19", "20",
-        "21", "22", "23",};
+        "00", "01", "02", "03", "04",
+        "05", "06", "07", "08", "09",
+        "10", "11", "12", "13", "14",
+        "15", "16", "17", "18", "19",
+        "20", "21", "22", "23",};
 
     private final String[] minNames = {
-        "00", "05", "10", "15", "20", "25",
-        "30", "35", "40", "45", "50", "55",};
+        "00", "05", "10", "15", "20",
+        "25", "30", "35", "40", "45",
+        "50", "55",};
 
     private double
             tickStart          =  0.990, /* tick radial start positon (1.0 for all) */
@@ -162,8 +165,8 @@ public class JChrono extends JComponent {
             minHandWidth       =  0.020,
             secHandWidth       =  0.008,
             minutesFontSize    =  0.100,
-            hoursMinorFontSize =  0.100,
-            hoursMajorFontSize =  0.140,
+            hoursMinorFontSize =  0.070,
+            hoursMajorFontSize =  0.120,
             halfMoonRadius     =  0.040;
 
     float   tick200msWidth     =  0.005f,
@@ -181,7 +184,8 @@ public class JChrono extends JComponent {
             tick1sColor,
             tick5sColor,
             tick10sColor,
-            tick1hColor,
+            tick1hMajorColor,
+            tick1hMinorColor,
             lbl5sColor,
             lbl1hMajorColor,
             lbl1hMinorColor,
@@ -201,24 +205,23 @@ public class JChrono extends JComponent {
     public JChrono() {
         staticPart = new StaticDrawable();
         hourHand = new SimpleHand(
-                hourHandColor,
+                this::getHourHandColor,
                 CAP_ROUND, hourHead, hourTail,
                 (float) hourHandWidth);
         minuteHand = new SimpleHand(
-                minuteHandColor,
+                this::getMinuteHandColor,
                 CAP_ROUND, minHead, minTail,
                 (float) minHandWidth);
         secondHand = new SecondHand(
-                secondHandColor,
+                this::getSecondHandColor,
                 CAP_SQUARE, secHead, secTail,
                 (float) secHandWidth);
+        timer.setInitialDelay( 5_000 );
         timer.start();
     }
 
     @SuppressWarnings("this-escape")
-    Timer timer = new Timer(
-            23,
-            e -> { invalidate(); repaint(); });
+    Timer timer = new Timer( 23, e -> { /* invalidate(); */ repaint(); });
 
     private abstract class AbstractDrawable {
 
@@ -271,42 +274,45 @@ public class JChrono extends JComponent {
         }
 
         private void consume(
-                Shape[]  p_shape,
-                Paint[]  p_paint,
-                Stroke[] p_stroke,
-                Font[]   p_font,
-                Graphics2D p_gc,
+                Shape[]         p_shape,
+                Paint[]         p_paint,
+                Stroke[]        p_stroke,
+                Graphics2D      p_gc,
                 AffineTransform p_rotation,
                 Consumer<Shape> p_what_to_do)
         {
-            if (isValid(p_shape)) {
+            if (isValid( p_shape )) {
                 for (int i = 0; i < p_shape.length; ++i) {
-                    if (!isValid(p_shape, i))
+                    if (!isValid( p_shape, i )) {
                         continue; /* nothing to do */
+                    }
 
-                    if (isValid( p_paint, i ))
+                    if (isValid( p_paint, i )) {
                         p_gc.setPaint( p_paint[i] );
-                    if (isValid( p_stroke, i ))
+                    }
+                    if (isValid( p_stroke, i )) {
                         p_gc.setStroke( p_stroke[i] );
-                    if (isValid( p_font, i ))
-                        p_gc.setFont( p_font[i] );
+                    }
 
                     /* and proceed to consume with p_what_to_do */
-                    if (p_rotation == null)
-                        p_what_to_do.accept(p_shape[i] ); /* draw it!! */
-                    else
-                        p_what_to_do.accept(p_rotation  /* rotate & draw it!! */
-                                .createTransformedShape(
-                                        p_shape[i] ) );
+                    if (isValid(p_shape, i)) {
+                        if (p_rotation == null) {
+                            p_what_to_do.accept( p_shape[i] );
+                            /* draw it!! */
+                        } else {
+                            p_what_to_do.accept( p_rotation /* rotate & draw it!! */
+                                    .createTransformedShape(
+                                            p_shape[i] ) );
+                        }
+                    }
                 }
             }
         }
 
         void draw(
-                Graphics2D      p_gc,
-                AffineTransform p_at,
-                double          p_radius,
-                Double          p_rotation)
+                Graphics2D p_gc,
+                double     p_radius,
+                Double     p_rotation)
         {
             /* scale figures if radius has been changed */
             if (oldRadius != p_radius) {
@@ -323,19 +329,17 @@ public class JChrono extends JComponent {
             }
 
             /* filling shapes that must be filled */
-            consume( shapeToFill,
+            consume(shapeToFill,
                      paintToFill,
                      null,  /* no draw is done here, so Strokes are not used.  */
-                     null,
                      p_gc,
                      rotation,
                      p_gc::fill );
 
             /* drawing shapes that must be drawn */
-            consume( shapeToDraw,
+            consume(shapeToDraw,
                      paintToDraw,
-                     strokeToDraw,
-                     null,  /* no drawString, so no font info is used */
+                     strokeToDraw,  /* no drawString, so no font info is used */
                      p_gc,
                      rotation,
                      p_gc::draw );
@@ -359,13 +363,7 @@ public class JChrono extends JComponent {
             super(  new GeneralPath[IX_COUNT], /* shapeToFill */
                     new GeneralPath[IX_COUNT], /* shapeToDraw */
                     new Paint[IX_COUNT],       /* paintToFill */
-                    new Paint[] {              /* p_paint_to_draw */
-                        tick200msColor,
-                        tick1sColor,
-                        tick5sColor,
-                        tick10sColor,
-                        lbl1hMinorColor,
-                        lbl1hMajorColor},
+                    new Paint[IX_COUNT],       /* p_paint_to_draw */
                     new BasicStroke[IX_COUNT], /* p_stroke_to_draw (need
                                                 * to be built on
                                                 * scaling) */
@@ -392,17 +390,28 @@ public class JChrono extends JComponent {
                 tick200msWidth, tick1sWidth, tick5sWidth,
                 tick10sWidth, tick1hMinorWidth, tick1hMajorWidth,
             };
+            Paint[] tick_paint = {
+                tick200msColor, tick1sColor, tick5sColor,
+                tick10sColor, tick1hMinorColor, tick1hMajorColor,
+            };
+            Paint[] tick_fill = {
+                null, null, lbl5sColor,
+                lbl5sColor, lbl1hMinorColor, lbl1hMajorColor,
+            };
             int[] tick_cap = {
                 CAP_ROUND, CAP_ROUND, CAP_SQUARE, CAP_SQUARE,
                 CAP_ROUND, CAP_ROUND
             };
 
-            shapeToDraw[IX_200MS]   = new GeneralPath();
-            shapeToDraw[IX_1S]      = new GeneralPath();
-            shapeToDraw[IX_5S]      = new GeneralPath();
-            shapeToDraw[IX_10S]     = new GeneralPath();
-            shapeToDraw[IX_1H_MINOR]= new GeneralPath();
-            shapeToDraw[IX_1H_MAJOR]= new GeneralPath();
+            shapeToDraw[IX_200MS]    = new GeneralPath();
+            shapeToDraw[IX_1S]       = new GeneralPath();
+            shapeToDraw[IX_5S]       = new GeneralPath();
+            shapeToDraw[IX_10S]      = new GeneralPath();
+            shapeToDraw[IX_1H_MINOR] = new GeneralPath();
+            shapeToDraw[IX_1H_MAJOR] = new GeneralPath();
+
+            paintToDraw = tick_paint;
+
             for (int i = 0; i < IX_COUNT; ++i) {
                 strokeToDraw[i] = new BasicStroke(
                         (float)(tick_width[i]*p_new_radius),
@@ -430,6 +439,7 @@ public class JChrono extends JComponent {
 
             /* now the figures associated with minutes & seconds */
             shapeToFill[IX_5S]  = new GeneralPath();
+            paintToFill         = tick_fill;
             Font font_to_render = minutesFont.deriveFont(
                      (float)(p_new_radius * minutesFontSize));
             FontRenderContext font_render_context
@@ -438,12 +448,12 @@ public class JChrono extends JComponent {
             final int N2 = 12;
             for (int i = 0; i < N2; ++i) {
 
-                double angle = 2.0 * PI * i / N2;
+                double angle    =  2.0 * PI * i / N2;
                 double x_scaled =  sin(angle) * p_new_radius,
                        y_scaled = -cos(angle) * p_new_radius;
 
-                GlyphVector glyph_vector = font_to_render
-                        .createGlyphVector(
+                GlyphVector glyph_vector
+                        = font_to_render.createGlyphVector(
                                 font_render_context, minNames[i] );
                 Rectangle2D bounds = glyph_vector.getVisualBounds();
                 shapeToFill[IX_5S].append( glyph_vector.getOutline(
@@ -503,25 +513,27 @@ public class JChrono extends JComponent {
 
         double head, tail, width;
         int    capStyle;
+        Supplier<? extends Paint> colorGetter;
 
         public SimpleHand(
-                Color p_color,
-                int   p_stroke_cap,
-                double p_head,
-                double p_tail,
-                float p_line_width)
+                Supplier<Paint> p_paint,
+                int             p_stroke_cap,
+                double          p_head,
+                double          p_tail,
+                float           p_line_width)
         {
-            super(  null,                  /* p_shape_to_fill */
-                    new GeneralPath[1],    /* p_shape_to_draw */
-                    new Color[] {p_color}, /* p_paint_to_fill */
-                    new Color[] {p_color}, /* p_paint_to_draw */
-                    new Stroke[1],         /* p_stroke_to_draw */
-                    null);                 /* p_font_to_render */
+            super(  new GeneralPath[1], /* p_shape_to_fill */
+                    new GeneralPath[1], /* p_shape_to_draw */
+                    new Color[1],       /* p_paint_to_fill */
+                    new Color[1],       /* p_paint_to_draw */
+                    new Stroke[1],      /* p_stroke_to_draw */
+                    null);              /* p_font_to_render */
 
-            head     = p_head;
-            tail     = p_tail;
-            width    = p_line_width;
-            capStyle = p_stroke_cap;
+            head        = p_head;
+            tail        = p_tail;
+            width       = p_line_width;
+            capStyle    = p_stroke_cap;
+            colorGetter = p_paint;
         }
 
         @Override
@@ -530,6 +542,10 @@ public class JChrono extends JComponent {
                 double     p_new_radius)
         {
             GeneralPath path = shapeToDraw[0] = new GeneralPath();
+            if (colorGetter != null) {
+                paintToDraw[0] =
+                paintToFill[0] = colorGetter.get();
+            }
             strokeToDraw[0] = new BasicStroke(
                     (float)(width * p_new_radius),
                     capStyle, CAP_ROUND);
@@ -541,19 +557,17 @@ public class JChrono extends JComponent {
     private class SecondHand extends SimpleHand {
 
         public SecondHand(
-                Color p_color,
+                Supplier<Paint> p_color_getter,
                 int p_stroke_cap,
                 double p_head,
                 double p_tail,
                 float p_line_width)
         {
-            super(  secondHandColor,
+            super(  p_color_getter,
                     p_stroke_cap,
                     p_head,
                     p_tail,
                     p_line_width);
-            shapeToFill = new GeneralPath[1];
-            paintToFill = new Paint[1];
         }
 
         @Override
@@ -561,16 +575,16 @@ public class JChrono extends JComponent {
                 Graphics2D p_g2d,
                 double     p_new_radius)
         {
+
             shapeToFill[0] = new GeneralPath();
-            paintToFill[0] = secondHandColor;
             double half_moon_diameter = halfMoonRadius * 2.0 * p_new_radius;
             Area half_moon = new Area(new Ellipse2D.Double(
                     -halfMoonRadius            * p_new_radius,
                     (-secTail) * p_new_radius,
                     half_moon_diameter, half_moon_diameter));
             half_moon.subtract(new Area(new Ellipse2D.Double(
-                    (-halfMoonRadius + halfMoonRadius/2) * p_new_radius,
-                    (-secTail + halfMoonRadius/2)        * p_new_radius,
+                    (-halfMoonRadius + halfMoonRadius/2.8284) * p_new_radius,
+                    (-secTail + halfMoonRadius/2.8284)        * p_new_radius,
                     half_moon_diameter, half_moon_diameter)));
             shapeToFill[0].append(half_moon, false);
 
@@ -595,7 +609,8 @@ public class JChrono extends JComponent {
         /* get a new Graphics2D so we can mangle it */
         g2d = (Graphics2D) g2d.create();
 
-        g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(
+                KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         /* We don't paint on the insets zone */
         Insets insets = getInsets();
@@ -607,19 +622,20 @@ public class JChrono extends JComponent {
         double radius = min(width, height) / 2.0;
         g2d.translate(insets.left + width / 2.0, insets.top + height / 2.0);
 
-        staticPart.draw(g2d, null, radius, null);
+        staticPart.draw(g2d, radius, null);
 
         long timestamp = System.currentTimeMillis();
         timestamp -= new Date(timestamp).getTimezoneOffset() * 60_000L;
 
+        g2d.setColor( getForeground() );
         timestamp %= 86_400_000L;
-        hourHand.draw(g2d, null, radius,
+        hourHand.draw(g2d, radius,
                 2.0*PI*timestamp/86_400_000.0);
         timestamp %= 3_600_000L;
-        minuteHand.draw(g2d, null, radius,
+        minuteHand.draw(g2d, radius,
                 2.0*PI*timestamp/3_600_000.0);
         timestamp %= 60_000L;
-        secondHand.draw(g2d, null, radius,
+        secondHand.draw(g2d, radius,
                 2.0*PI*timestamp/60_000.0);
 
     }
@@ -1242,17 +1258,30 @@ public class JChrono extends JComponent {
     }
 
     @BeanProperty
-    public Color getTick1hColor() {
-        return tick1hColor;
+    public Color getTick1hMajorColor() {
+        return tick1hMajorColor;
     }
 
-    public void setTick1hColor(Color p_tick1hColor) {
-        Color old_tick1hColor = tick1hColor;
-        tick1hColor = p_tick1hColor;
+    public void setTick1hMajorColor(Color p_tick1hColor) {
+        Color old_tick1hColor = tick1hMajorColor;
+        tick1hMajorColor = p_tick1hColor;
         if (!Objects.equals(old_tick1hColor, p_tick1hColor)) {
-            pcs.firePropertyChange(
-                    TICK_1H_COLOR_PROPERTY_NAME,
+            pcs.firePropertyChange(TICK_1H_MAJOR_COLOR_PROPERTY_NAME,
                     old_tick1hColor, p_tick1hColor);
+        }
+    }
+
+    @BeanProperty
+    public Color getTick1hMinorColor() {
+        return tick1hMinorColor;
+    }
+
+    public void setTick1hMinorColor(Color p_tick1hMinorColor) {
+        Color old_tick1hMinorColor = tick1hMinorColor;
+        tick1hMinorColor = p_tick1hMinorColor;
+        if (!Objects.equals(old_tick1hMinorColor, p_tick1hMinorColor)) {
+            pcs.firePropertyChange(TICK_1H_MINOR_COLOR_PROPERTY_NAME,
+                    old_tick1hMinorColor, p_tick1hMinorColor);
         }
     }
 
@@ -1412,21 +1441,22 @@ public class JChrono extends JComponent {
             contentPane.setLayout(new BorderLayout(10, 10));
             JChrono crono = new JChrono();
             JScrollPane scp = new JScrollPane(crono);
-            crono.hourHandColor   = Color.ORANGE;
-            crono.minuteHandColor = Color.BLUE;
-            crono.secondHandColor = Color.RED;
-            crono.tick200msColor  = Color.YELLOW;
-            crono.tick1sColor     = new Color(192, 255, 192);
-            crono.tick5sColor     = new Color(192, 255, 192);
-            crono.tick10sColor    = Color.WHITE;
-            crono.tick1hColor     = new Color(192, 128, 0);
-            crono.lbl1hMajorColor = Color.YELLOW;
-            crono.lbl1hMinorColor = Color.CYAN;
-            crono.lbl5sColor      = Color.LIGHT_GRAY;
+//            crono.hourHandColor    = Color.ORANGE;
+//            crono.minuteHandColor  = Color.BLUE;
+//            crono.secondHandColor  = Color.RED;
+//            crono.tick200msColor   = Color.red;
+//            crono.tick1sColor      = new Color(64, 128, 64);
+//            crono.tick5sColor      = Color.ORANGE;
+//            crono.tick10sColor     = Color.darkGray;
+//            crono.tick1hMajorColor = new Color(64, 128, 0);
+//            crono.tick1hMinorColor = new Color(192, 0, 192);
+//            crono.lbl1hMajorColor  = new Color(0, 0, 192);
+//            crono.lbl1hMinorColor  = Color.MAGENTA;
+//            crono.lbl5sColor       = Color.GRAY;
 //            contentPane.setBorder(
 //                    new TitledBorder(new LineBorder(Color.blue),
 //                            "Hola como estas?"));
-            int N = 100;
+            int N = 1000;
             crono.setPreferredSize(new Dimension(N, N));
             contentPane.add(scp, BorderLayout.CENTER);
 //            contentPane.add(
